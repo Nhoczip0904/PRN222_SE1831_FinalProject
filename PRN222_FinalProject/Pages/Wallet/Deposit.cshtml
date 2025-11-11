@@ -1,0 +1,103 @@
+@page
+@model PRN222_FinalProject.Pages.Wallet.DepositModel
+@{
+    ViewData["Title"] = "Nạp tiền";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-cash-coin"></i> Nạp tiền vào ví</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>Số dư hiện tại:</strong> @(Model.CurrentBalance.ToString("N0")) VND
+                    </div>
+
+                    <form method="post">
+                        <div class="mb-3">
+                            <label asp-for="DepositDto.Amount" class="form-label">Số tiền nạp (VND) <span class="text-danger">*</span></label>
+                            <input asp-for="DepositDto.Amount" type="number" class="form-control form-control-lg" min="10000" step="1000" />
+                            <span asp-validation-for="DepositDto.Amount" class="text-danger"></span>
+                            <small class="text-muted">Tối thiểu: 10,000 VND</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Chọn nhanh:</label>
+                            <div class="btn-group w-100" role="group">
+                                <button type="button" class="btn btn-outline-primary" onclick="setAmount(100000)">100K</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="setAmount(500000)">500K</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="setAmount(1000000)">1M</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="setAmount(5000000)">5M</button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="DepositDto.Description" class="form-label">Ghi chú</label>
+                            <textarea asp-for="DepositDto.Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="DepositDto.Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Phương thức thanh toán <span class="text-danger">*</span></label>
+                            <div class="list-group">
+                                <label class="list-group-item">
+                                    <input class="form-check-input me-2" type="radio" name="PaymentMethod" value="vnpay" checked>
+                                    <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png" height="30" alt="VNPay">
+                                    <strong>VNPay</strong>
+                                    <span class="badge bg-success">Khuyến nghị</span>
+                                </label>
+                                <label class="list-group-item">
+                                    <input class="form-check-input me-2" type="radio" name="PaymentMethod" value="demo">
+                                    <i class="bi bi-cash-coin"></i>
+                                    <strong>Demo (Nạp trực tiếp)</strong>
+                                    <span class="badge bg-warning">Chỉ để test</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" asp-page-handler="VNPay" class="btn btn-primary btn-lg" id="btnVNPay">
+                                <i class="bi bi-credit-card"></i> Thanh toán qua VNPay
+                            </button>
+                            <button type="submit" asp-page-handler="Demo" class="btn btn-success btn-lg" id="btnDemo" style="display:none;">
+                                <i class="bi bi-check-circle"></i> Nạp tiền Demo
+                            </button>
+                            <a asp-page="/Wallet/Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function setAmount(amount) {
+            document.querySelector('input[name="DepositDto.Amount"]').value = amount;
+        }
+
+        // Toggle payment buttons based on selected method
+        document.querySelectorAll('input[name="PaymentMethod"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const btnVNPay = document.getElementById('btnVNPay');
+                const btnDemo = document.getElementById('btnDemo');
+                
+                if (this.value === 'vnpay') {
+                    btnVNPay.style.display = 'block';
+                    btnDemo.style.display = 'none';
+                } else {
+                    btnVNPay.style.display = 'none';
+                    btnDemo.style.display = 'block';
+                }
+            });
+        });
+    </script>
+}

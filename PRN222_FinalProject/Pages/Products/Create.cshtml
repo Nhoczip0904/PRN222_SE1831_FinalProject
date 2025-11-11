@@ -1,0 +1,152 @@
+@page
+@model PRN222_FinalProject.Pages.Products.CreateModel
+@{
+    ViewData["Title"] = "Đăng sản phẩm mới";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="bi bi-plus-circle"></i> Đăng sản phẩm mới</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label asp-for="CreateDto.Name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
+                            <input asp-for="CreateDto.Name" class="form-control" />
+                            <span asp-validation-for="CreateDto.Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CreateDto.CategoryId" class="form-label">Danh mục <span class="text-danger">*</span></label>
+                            <select asp-for="CreateDto.CategoryId" class="form-select">
+                                <option value="">-- Chọn danh mục --</option>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </select>
+                            <span asp-validation-for="CreateDto.CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="CreateDto.Price" class="form-label">Giá (VND) <span class="text-danger">*</span></label>
+                                <input asp-for="CreateDto.Price" type="number" class="form-control" />
+                                <span asp-validation-for="CreateDto.Price" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="CreateDto.Quantity" class="form-label">Số lượng <span class="text-danger">*</span></label>
+                                <input asp-for="CreateDto.Quantity" type="number" min="1" class="form-control" value="1" />
+                                <span asp-validation-for="CreateDto.Quantity" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="CreateDto.BatteryHealthPercent" class="form-label">Tình trạng pin (%)</label>
+                                <input asp-for="CreateDto.BatteryHealthPercent" type="number" min="0" max="100" class="form-control" />
+                                <span asp-validation-for="CreateDto.BatteryHealthPercent" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CreateDto.Condition" class="form-label">Tình trạng <span class="text-danger">*</span></label>
+                            <select asp-for="CreateDto.Condition" class="form-select" required>
+                                <option value="">-- Chọn tình trạng --</option>
+                                <option value="new">Mới (New)</option>
+                                <option value="good">Như mới (Good)</option>
+                                <option value="fair">Đã sử dụng (Fair)</option>
+                                <option value="poor">Cần sửa chữa (Poor)</option>
+                            </select>
+                            <span asp-validation-for="CreateDto.Condition" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CreateDto.Description" class="form-label">Mô tả <span class="text-danger">*</span></label>
+                            <textarea asp-for="CreateDto.Description" class="form-control" rows="5"></textarea>
+                            <span asp-validation-for="CreateDto.Description" class="text-danger"></span>
+                            <small class="text-muted">Tối đa 1000 ký tự</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="CreateDto.ImageFiles" class="form-label">Hình ảnh</label>
+                            <input asp-for="CreateDto.ImageFiles" type="file" class="form-control" multiple accept="image/*" />
+                            <small class="text-muted">Tối đa 5MB mỗi ảnh. Có thể chọn nhiều ảnh.</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Đăng sản phẩm
+                            </button>
+                            <a asp-page="/Products/MyProducts" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Validate Price > 0
+            $('input[name="CreateDto.Price"]').on('input', function() {
+                var price = parseFloat($(this).val());
+                if (price <= 0) {
+                    $(this).addClass('is-invalid');
+                    $(this).next('.text-danger').text('Giá phải lớn hơn 0');
+                } else {
+                    $(this).removeClass('is-invalid');
+                    $(this).next('.text-danger').text('');
+                }
+            });
+
+            // Validate Battery Health 0-100
+            $('input[name="CreateDto.BatteryHealthPercent"]').on('input', function() {
+                var battery = parseInt($(this).val());
+                if (battery < 0 || battery > 100) {
+                    $(this).addClass('is-invalid');
+                    $(this).next('.text-danger').text('Tình trạng pin phải từ 0-100%');
+                } else {
+                    $(this).removeClass('is-invalid');
+                    $(this).next('.text-danger').text('');
+                }
+            });
+
+            // Validate form before submit
+            $('form').on('submit', function(e) {
+                var price = parseFloat($('input[name="CreateDto.Price"]').val());
+                var battery = parseInt($('input[name="CreateDto.BatteryHealthPercent"]').val());
+                var condition = $('select[name="CreateDto.Condition"]').val();
+
+                var isValid = true;
+
+                if (price <= 0 || isNaN(price)) {
+                    alert('Giá phải lớn hơn 0');
+                    isValid = false;
+                }
+
+                if (battery && (battery < 0 || battery > 100 || isNaN(battery))) {
+                    alert('Tình trạng pin phải từ 0-100%');
+                    isValid = false;
+                }
+
+                if (!condition) {
+                    alert('Vui lòng chọn tình trạng sản phẩm');
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        });
+    </script>
+}

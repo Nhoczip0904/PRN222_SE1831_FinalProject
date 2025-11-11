@@ -1,0 +1,161 @@
+@page
+@model PRN222_FinalProject.Pages.Admin.Products.PendingModel
+@{
+    ViewData["Title"] = "Duyệt sản phẩm";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-box-seam"></i> Duyệt sản phẩm chờ</h2>
+        <span class="badge bg-warning fs-5">@Model.PendingProducts.Count() sản phẩm</span>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!Model.PendingProducts.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Không có sản phẩm nào đang chờ duyệt.
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var product in Model.PendingProducts)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        @if (!string.IsNullOrEmpty(product.Images))
+                        {
+                            var firstImage = product.Images.Split(',').FirstOrDefault();
+                            <img src="@firstImage" class="card-img-top" alt="@product.Name" style="height: 200px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        }
+                        
+                        <div class="card-body">
+                            <h5 class="card-title">@product.Name</h5>
+                            <p class="card-text text-muted small">
+                                @if (!string.IsNullOrEmpty(product.Description))
+                                {
+                                    @(product.Description.Length > 100 ? product.Description.Substring(0, 100) + "..." : product.Description)
+                                }
+                            </p>
+                            
+                            <div class="mb-2">
+                                <span class="badge bg-info">@product.CategoryName</span>
+                                <span class="badge bg-secondary">@product.Condition</span>
+                            </div>
+                            
+                            <ul class="list-unstyled small">
+                                <li><i class="bi bi-currency-dollar text-success"></i> <strong>@product.Price.ToString("N0") VND</strong></li>
+                                <li><i class="bi bi-battery-half text-warning"></i> Pin: @product.BatteryHealthPercent%</li>
+                                <li><i class="bi bi-person text-primary"></i> Người bán: @product.SellerName</li>
+                                <li><i class="bi bi-calendar text-muted"></i> @product.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card-footer bg-white">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveModal-@product.Id">
+                                    <i class="bi bi-check-circle"></i> Duyệt
+                                </button>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal-@product.Id">
+                                    <i class="bi bi-x-circle"></i> Từ chối
+                                </button>
+                                <a asp-page="/Products/Details" asp-route-id="@product.Id" class="btn btn-outline-primary" target="_blank">
+                                    <i class="bi bi-eye"></i> Xem chi tiết
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Approve Modal -->
+                <div class="modal fade" id="approveModal-@product.Id" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title"><i class="bi bi-check-circle"></i> Xác nhận duyệt</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="post" asp-page-handler="Approve">
+                                <div class="modal-body">
+                                    <input type="hidden" name="productId" value="@product.Id" />
+                                    <p>Bạn có chắc chắn muốn <strong class="text-success">DUYỆT</strong> sản phẩm này?</p>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6>@product.Name</h6>
+                                            <p class="text-muted small mb-0">Người bán: @product.SellerName</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-check-circle"></i> Xác nhận duyệt
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reject Modal -->
+                <div class="modal fade" id="rejectModal-@product.Id" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title"><i class="bi bi-x-circle"></i> Từ chối sản phẩm</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="post" asp-page-handler="Reject">
+                                <div class="modal-body">
+                                    <input type="hidden" name="productId" value="@product.Id" />
+                                    <p>Bạn có chắc chắn muốn <strong class="text-danger">TỪ CHỐI</strong> sản phẩm này?</p>
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h6>@product.Name</h6>
+                                            <p class="text-muted small mb-0">Người bán: @product.SellerName</p>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label"><strong>Lý do từ chối:</strong> <span class="text-danger">*</span></label>
+                                        <textarea name="reason" class="form-control" rows="3" required 
+                                                  placeholder="Nhập lý do từ chối (bắt buộc)..."></textarea>
+                                        <div class="form-text">Lý do này sẽ được gửi cho người bán</div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="bi bi-x-circle"></i> Xác nhận từ chối
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

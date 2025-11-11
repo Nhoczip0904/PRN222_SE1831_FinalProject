@@ -1,0 +1,100 @@
+@page
+@model PRN222_FinalProject.Pages.Wallet.IndexModel
+@{
+    ViewData["Title"] = "Ví của tôi";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-wallet2"></i> Ví của tôi</h4>
+                </div>
+                <div class="card-body text-center">
+                    <p class="text-muted">Số dư hiện tại</p>
+                    <h2 class="text-success">@(Model.Wallet?.Balance.ToString("N0") ?? "0") VND</h2>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <a asp-page="/Wallet/Deposit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Nạp tiền
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Lịch sử giao dịch</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Transactions != null && Model.Transactions.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Thời gian</th>
+                                        <th>Loại giao dịch</th>
+                                        <th>Số tiền</th>
+                                        <th>Số dư sau</th>
+                                        <th>Mô tả</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var transaction in Model.Transactions)
+                                    {
+                                        <tr>
+                                            <td>@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                @switch (transaction.TransactionType)
+                                                {
+                                                    case "deposit":
+                                                        <span class="badge bg-success">Nạp tiền</span>
+                                                        break;
+                                                    case "payment":
+                                                        <span class="badge bg-danger">Thanh toán</span>
+                                                        break;
+                                                    case "refund":
+                                                        <span class="badge bg-info">Hoàn tiền</span>
+                                                        break;
+                                                    case "bid_hold":
+                                                        <span class="badge bg-warning">Giữ tiền đấu giá</span>
+                                                        break;
+                                                    case "bid_release":
+                                                        <span class="badge bg-secondary">Hoàn tiền đấu giá</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-secondary">@transaction.TransactionType</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (transaction.TransactionType == "deposit" || transaction.TransactionType == "refund" || transaction.TransactionType == "bid_release")
+                                                {
+                                                    <span class="text-success">+@transaction.Amount.ToString("N0") VND</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-danger">-@transaction.Amount.ToString("N0") VND</span>
+                                                }
+                                            </td>
+                                            <td><strong>@transaction.BalanceAfter.ToString("N0") VND</strong></td>
+                                            <td>@transaction.Description</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">Chưa có giao dịch nào</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

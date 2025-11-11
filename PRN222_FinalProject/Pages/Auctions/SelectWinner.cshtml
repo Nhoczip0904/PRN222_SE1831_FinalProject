@@ -1,0 +1,125 @@
+@page "{auctionId:int}"
+@model PRN222_FinalProject.Pages.Auctions.SelectWinnerModel
+@{
+    ViewData["Title"] = "Chọn người thắng đấu giá";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0"><i class="bi bi-trophy"></i> Chọn người thắng đấu giá</h4>
+                </div>
+                <div class="card-body">
+                    @if (Model.Auction != null)
+                    {
+                        <div class="alert alert-info">
+                            <h5>Thông tin đấu giá</h5>
+                            <p class="mb-1"><strong>Sản phẩm:</strong> @Model.Auction.ProductName</p>
+                            <p class="mb-1"><strong>Giá khởi điểm:</strong> @Model.Auction.StartingPrice.ToString("N0") VND</p>
+                            <p class="mb-1"><strong>Giá hiện tại:</strong> @Model.Auction.CurrentPrice?.ToString("N0") VND</p>
+                            <p class="mb-1"><strong>Thời gian kết thúc:</strong> @Model.Auction.EndTime.ToString("dd/MM/yyyy HH:mm")</p>
+                            <p class="mb-0"><strong>Tổng số lượt đặt giá:</strong> @Model.Auction.TotalBids</p>
+                        </div>
+
+                        @if (Model.Bids != null && Model.Bids.Any())
+                        {
+                            <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+                                <h5 class="mb-0">Danh sách người đặt giá</h5>
+                                @if (Model.Auction.Status != "closed")
+                                {
+                                    <form method="post" asp-page-handler="CloseWithHighest" class="d-inline">
+                                        <button type="submit" class="btn btn-success" 
+                                                onclick="return confirm('Xác nhận đóng đấu giá và chọn người đặt giá cao nhất làm người thắng?')">
+                                            <i class="bi bi-lightning-fill"></i> Đóng ngay với giá cao nhất
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Người đặt</th>
+                                            <th>Số tiền</th>
+                                            <th>Thời gian</th>
+                                            <th>Trạng thái</th>
+                                            <th>Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var bid in Model.Bids.OrderByDescending(b => b.BidAmount))
+                                        {
+                                            <tr class="@(bid.IsWinning ? "table-success" : "")">
+                                                <td>
+                                                    <strong>@bid.BidderName</strong>
+                                                    @if (bid.IsWinning)
+                                                    {
+                                                        <span class="badge bg-success ms-2">Đang dẫn đầu</span>
+                                                    }
+                                                </td>
+                                                <td><strong class="text-primary">@bid.BidAmount.ToString("N0") VND</strong></td>
+                                                <td>@bid.BidTime.ToString("dd/MM HH:mm")</td>
+                                                <td>
+                                                    @if (Model.Auction.Status == "closed" && Model.Auction.WinnerId == bid.BidderId)
+                                                    {
+                                                        <span class="badge bg-success"><i class="bi bi-trophy"></i> Người thắng</span>
+                                                    }
+                                                    else if (bid.IsWinning)
+                                                    {
+                                                        <span class="badge bg-warning">Giá cao nhất</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">Đã bị vượt</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (Model.Auction.Status != "closed" && bid.IsWinning)
+                                                    {
+                                                        <form method="post" asp-route-winnerId="@bid.BidderId" class="d-inline">
+                                                            <button type="submit" class="btn btn-sm btn-success" 
+                                                                    onclick="return confirm('Xác nhận chọn @bid.BidderName làm người thắng với giá @bid.BidAmount.ToString("N0") VND? Đấu giá sẽ được đóng ngay lập tức.')">
+                                                                <i class="bi bi-check-circle"></i> Chọn làm người thắng
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="alert alert-warning mt-3">
+                                <i class="bi bi-exclamation-triangle"></i> 
+                                <strong>Lưu ý:</strong> 
+                                <ul class="mb-0 mt-2">
+                                    <li><strong>Bạn có thể đóng đấu giá bất kỳ lúc nào</strong></li>
+                                    <li>Chỉ người đặt giá cao nhất mới có thể được chọn làm người thắng</li>
+                                    <li>Người thắng phải có đủ số dư trong ví</li>
+                                    <li>Tiền sẽ tự động được trừ từ ví người thắng và cộng vào ví của bạn</li>
+                                    <li>Đơn hàng sẽ được tạo tự động</li>
+                                    <li>Sau khi đóng, đấu giá không thể mở lại</li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">
+                                <i class="bi bi-info-circle"></i> Chưa có ai đặt giá cho đấu giá này
+                            </div>
+                        }
+
+                        <div class="mt-3">
+                            <a asp-page="/Auctions/MyAuctions" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Quay lại
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,106 @@
+@page
+@model PRN222_FinalProject.Pages.Payment.VNPayCallbackModel
+@{
+    ViewData["Title"] = "Kết quả thanh toán";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            @if (Model.Success)
+            {
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white text-center">
+                        <h3><i class="bi bi-check-circle"></i> Thanh toán thành công!</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                        </div>
+                        <table class="table">
+                            <tr>
+                                <td><strong>Mã giao dịch:</strong></td>
+                                <td>@Model.TransactionId</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Số tiền:</strong></td>
+                                <td class="text-success"><strong>@Model.Amount.ToString("N0") VND</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Nội dung:</strong></td>
+                                <td>@Model.OrderInfo</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Thời gian:</strong></td>
+                                <td>@Model.PayDate</td>
+                            </tr>
+                        </table>
+                        
+                        @if (Model.IsWalletDeposit)
+                        {
+                            <div class="alert alert-info">
+                                <i class="bi bi-wallet2"></i> Số dư ví của bạn đã được cập nhật!
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a asp-page="/Wallet/Index" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-wallet2"></i> Xem ví của tôi
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="bi bi-receipt"></i> Đơn hàng của bạn đã được thanh toán!
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a asp-page="/Orders/Index" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-receipt"></i> Xem đơn hàng
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white text-center">
+                        <h3><i class="bi bi-x-circle"></i> Thanh toán thất bại!</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <i class="bi bi-x-circle-fill text-danger" style="font-size: 5rem;"></i>
+                        </div>
+                        <div class="alert alert-danger">
+                            <strong>Lỗi:</strong> @Model.Message
+                        </div>
+                        <table class="table">
+                            <tr>
+                                <td><strong>Mã giao dịch:</strong></td>
+                                <td>@Model.TransactionId</td>
+                            </tr>
+                            @if (Model.Amount > 0)
+                            {
+                                <tr>
+                                    <td><strong>Số tiền:</strong></td>
+                                    <td>@Model.Amount.ToString("N0") VND</td>
+                                </tr>
+                            }
+                        </table>
+                        <div class="d-grid gap-2">
+                            <a asp-page="/Index" class="btn btn-secondary btn-lg">
+                                <i class="bi bi-house"></i> Về trang chủ
+                            </a>
+                            @if (Model.IsWalletDeposit)
+                            {
+                                <a asp-page="/Wallet/Deposit" class="btn btn-primary">
+                                    <i class="bi bi-arrow-repeat"></i> Thử lại
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

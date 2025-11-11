@@ -1,0 +1,143 @@
+@page
+@model PRN222_FinalProject.Pages.Admin.Auctions.IndexModel
+@{
+    ViewData["Title"] = "Quản lý đấu giá";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+    <h2><i class="bi bi-hammer"></i> Quản lý đấu giá</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link @(Model.Status == "active" ? "active" : "")" asp-route-status="active">
+                Đang hoạt động
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(Model.Status == "expired" ? "active" : "")" asp-route-status="expired">
+                Hết hạn (cần chốt)
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(Model.Status == "closed" ? "active" : "")" asp-route-status="closed">
+                Đã chốt
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(Model.Status == "cancelled" ? "active" : "")" asp-route-status="cancelled">
+                Đã hủy
+            </a>
+        </li>
+    </ul>
+
+    @if (Model.Auctions != null && Model.Auctions.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Sản phẩm</th>
+                        <th>Người bán</th>
+                        <th>Giá khởi điểm</th>
+                        <th>Giá hiện tại</th>
+                        <th>Số lượt</th>
+                        <th>Kết thúc</th>
+                        <th>Người thắng</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var auction in Model.Auctions)
+                    {
+                        <tr>
+                            <td>@auction.Id</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="@(auction.ProductImage ?? "/images/no-image.png")" alt="@auction.ProductName" 
+                                         style="width: 50px; height: 50px; object-fit: cover;" class="rounded me-2">
+                                    <span>@auction.ProductName</span>
+                                </div>
+                            </td>
+                            <td>@auction.SellerName</td>
+                            <td>@auction.StartingPrice.ToString("N0")</td>
+                            <td><strong class="text-primary">@(auction.CurrentPrice?.ToString("N0") ?? auction.StartingPrice.ToString("N0"))</strong></td>
+                            <td><span class="badge bg-info">@auction.TotalBids</span></td>
+                            <td>@auction.EndTime.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @if (auction.WinnerName != null)
+                                {
+                                    <i class="bi bi-trophy text-success"></i>
+                                    <span>@auction.WinnerName</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a asp-page="/Auctions/Details" asp-route-id="@auction.Id" class="btn btn-sm btn-outline-primary" title="Xem">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    @if (auction.Status == "active" && auction.IsExpired && auction.TotalBids > 0)
+                                    {
+                                        <form method="post" asp-page-handler="Close" asp-route-id="@auction.Id" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-success" title="Chốt đấu giá" onclick="return confirm('Chốt đấu giá này?')">
+                                                <i class="bi bi-check-circle"></i> Chốt
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-route-pageNumber="@(Model.PageNumber - 1)" asp-route-status="@Model.Status">Trước</a>
+                    </li>
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                            <a class="page-link" asp-route-pageNumber="@i" asp-route-status="@Model.Status">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link" asp-route-pageNumber="@(Model.PageNumber + 1)" asp-route-status="@Model.Status">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+            <h4 class="mt-3">Không có đấu giá nào</h4>
+        </div>
+    }
+</div>

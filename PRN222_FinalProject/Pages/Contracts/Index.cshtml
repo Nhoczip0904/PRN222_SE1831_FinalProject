@@ -1,0 +1,154 @@
+@page
+@model PRN222_FinalProject.Pages.Contracts.IndexModel
+@{
+    ViewData["Title"] = "Hợp đồng của tôi";
+}
+
+<div class="container mt-4">
+    <h2><i class="bi bi-file-earmark-text"></i> Hợp đồng của tôi</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.Contracts != null && Model.Contracts.Any())
+    {
+        <div class="row">
+            @foreach (var contract in Model.Contracts)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong><i class="bi bi-file-text"></i> #@contract.ContractNumber</strong>
+                                <br>
+                                <small class="text-muted">Đơn hàng #@contract.OrderId</small>
+                            </div>
+                            @if (contract.Status == "approved")
+                            {
+                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Đã duyệt</span>
+                            }
+                            else if (contract.Status == "confirmed")
+                            {
+                                <span class="badge bg-info"><i class="bi bi-clock"></i> Chờ admin duyệt</span>
+                            }
+                            else if (contract.Status == "rejected")
+                            {
+                                <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Đã từ chối</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning"><i class="bi bi-hourglass"></i> Chờ xác nhận</span>
+                            }
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <p class="mb-2">
+                                    <i class="bi bi-person"></i> <strong>Người mua:</strong> @contract.Buyer?.FullName
+                                </p>
+                                <p class="mb-2">
+                                    <i class="bi bi-shop"></i> <strong>Người bán:</strong> @contract.Seller?.FullName
+                                </p>
+                                <p class="mb-2">
+                                    <i class="bi bi-cash-stack"></i> <strong>Giá trị:</strong> 
+                                    <span class="text-primary fw-bold">@contract.TotalAmount.ToString("N0") VND</span>
+                                </p>
+                                <p class="mb-0">
+                                    <i class="bi bi-calendar"></i> <strong>Ngày tạo:</strong> @contract.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+                                </p>
+                            </div>
+
+                            <hr>
+
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="mb-1">
+                                        @if (contract.BuyerConfirmed)
+                                        {
+                                            <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-hourglass text-warning fs-4"></i>
+                                        }
+                                    </div>
+                                    <small>Người mua</small>
+                                </div>
+                                <div class="col-4">
+                                    <div class="mb-1">
+                                        @if (contract.SellerConfirmed)
+                                        {
+                                            <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-hourglass text-warning fs-4"></i>
+                                        }
+                                    </div>
+                                    <small>Người bán</small>
+                                </div>
+                                <div class="col-4">
+                                    <div class="mb-1">
+                                        @if (contract.AdminApproved)
+                                        {
+                                            <i class="bi bi-shield-check-fill text-success fs-4"></i>
+                                        }
+                                        else if (contract.Status == "rejected")
+                                        {
+                                            <i class="bi bi-x-circle-fill text-danger fs-4"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-hourglass text-secondary fs-4"></i>
+                                        }
+                                    </div>
+                                    <small>Admin</small>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(contract.RejectionReason))
+                            {
+                                <div class="alert alert-danger mt-3 mb-0">
+                                    <small><strong>Lý do từ chối:</strong> @contract.RejectionReason</small>
+                                </div>
+                            }
+                        </div>
+                        <div class="card-footer bg-white">
+                            <div class="d-grid gap-2">
+                                <a asp-page="/Contracts/Details" asp-route-id="@contract.Id" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-eye"></i> Xem chi tiết & Xác nhận
+                                </a>
+                                <a asp-page="/Orders/Contract" asp-route-orderId="@contract.OrderId" class="btn btn-outline-secondary btn-sm" target="_blank">
+                                    <i class="bi bi-file-pdf"></i> Xem hợp đồng PDF
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+            <h4 class="mt-3">Chưa có hợp đồng nào</h4>
+            <p>Hợp đồng sẽ được tạo tự động khi bạn đặt hàng</p>
+            <a asp-page="/Products/Index" class="btn btn-primary mt-2">
+                <i class="bi bi-shop"></i> Mua sắm ngay
+            </a>
+        </div>
+    }
+</div>

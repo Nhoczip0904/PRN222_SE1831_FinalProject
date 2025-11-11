@@ -1,0 +1,225 @@
+@page
+@model PRN222_FinalProject.Pages.Products.CompareModel
+@{
+    ViewData["Title"] = "So sánh sản phẩm";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-arrow-left-right"></i> So sánh sản phẩm</h2>
+        <a asp-page="/Products/Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Quay lại
+        </a>
+    </div>
+
+    @if (Model.Products == null || !Model.Products.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> 
+            Chưa có sản phẩm nào để so sánh. Vui lòng chọn sản phẩm từ danh sách.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 200px;">Tiêu chí</th>
+                        @foreach (var product in Model.Products)
+                        {
+                            <th class="text-center">
+                                <a href="?handler=Remove&productId=@product.Id" class="btn btn-sm btn-danger float-end">
+                                    <i class="bi bi-x"></i>
+                                </a>
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Hình ảnh -->
+                    <tr>
+                        <td><strong>Hình ảnh</strong></td>
+                        @foreach (var product in Model.Products)
+                        {
+                            <td class="text-center">
+                                <img src="@(product.FirstImage ?? "/images/no-image.png")" 
+                                     alt="@product.Name" 
+                                     class="img-fluid rounded" 
+                                     style="max-height: 200px; object-fit: cover;">
+                            </td>
+                        }
+                    </tr>
+                    
+                    <!-- Tên sản phẩm -->
+                    <tr>
+                        <td><strong>Tên sản phẩm</strong></td>
+                        @foreach (var product in Model.Products)
+                        {
+                            <td class="text-center">
+                                <a asp-page="/Products/Details" asp-route-id="@product.Id" class="text-decoration-none">
+                                    <strong>@product.Name</strong>
+                                </a>
+                            </td>
+                        }
+                    </tr>
+                    
+                    <!-- Giá -->
+                    <tr class="table-warning">
+                        <td><strong><i class="bi bi-currency-dollar"></i> Giá</strong></td>
+                        @foreach (var product in Model.Products)
+                        {
+                            <td class="text-center">
+                                <h5 class="text-danger mb-0">@product.Price.ToString("N0") VND</h5>
+                            </td>
+                        }
+                    </tr>
+                    
+                    <!-- Sức khỏe pin -->
+                    <tr class="table-success">
+                        <td><strong><i class="bi bi-battery-charging"></i> Sức khỏe pin</strong></td>
+                        @foreach (var product in Model.Products)
+                        {
+                            <td class="text-center">
+                                @if (product.BatteryHealthPercent.HasValue)
+                                {
+                                    <span class="badge @(product.BatteryHealthPercent >= 80 ? "bg-success" : product.BatteryHealthPercent >= 60 ? "bg-warning" : "bg-danger") fs-6">
+                                        @product.BatteryHealthPercent%
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">N/A</span>
+                                }
+                            </td>
+                        }
+                    </tr>
+                    
+                    <!-- Tình trạng -->
+                    <tr>
+                        <td><strong><i class="bi bi-star"></i> Tình trạng</strong></td>
+                        @foreach (var product in Model.Products)
+                        {
+                            <td class="text-center">
+                                <span class="badge bg-info">@product.Condition</span>
+                            </td>
+                        }
+                    </tr>
+                    
+                    <!-- Danh mục -->
+                    <tr>
+                        <td><strong><i class="bi bi-tag"></i> Danh mục</strong></td>
+                        @foreach (var product in Model.Products)
+                        {
+                            <td class="text-center">@product.CategoryName</td>
+                        }
+                    </tr>
+                    
+                    <!-- Người bán -->
+                    <tr>
+                        <td><strong><i class="bi bi-person"></i> Người bán</strong></td>
+                        @foreach (var product in Model.Products)
+                        {
+                            <td class="text-center">@product.SellerName</td>
+                        }
+                    </tr>
+                    
+                    <!-- Ngày đăng -->
+                    <tr>
+                        <td><strong><i class="bi bi-calendar"></i> Ngày đăng</strong></td>
+                        @foreach (var product in Model.Products)
+                        {
+                            <td class="text-center">
+                                @product.CreatedAt?.ToString("dd/MM/yyyy")
+                            </td>
+                        }
+                    </tr>
+                    
+                    <!-- Mô tả -->
+                    <tr>
+                        <td><strong><i class="bi bi-file-text"></i> Mô tả</strong></td>
+                        @foreach (var product in Model.Products)
+                        {
+                            <td>
+                                <div style="max-height: 150px; overflow-y: auto;">
+                                    @product.Description
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                    
+                    <!-- Hành động -->
+                    <tr class="table-light">
+                        <td><strong>Hành động</strong></td>
+                        @foreach (var product in Model.Products)
+                        {
+                            <td class="text-center">
+                                <a asp-page="/Products/Details" asp-route-id="@product.Id" class="btn btn-primary w-100 mb-2">
+                                    <i class="bi bi-eye"></i> Xem chi tiết
+                                </a>
+                            </td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Highlight best values
+        document.addEventListener('DOMContentLoaded', function() {
+            highlightBestPrice();
+            highlightBestBattery();
+        });
+
+        function highlightBestPrice() {
+            const priceRow = document.querySelector('tr.table-warning');
+            if (!priceRow) return;
+            
+            const priceCells = priceRow.querySelectorAll('td:not(:first-child)');
+            let minPrice = Infinity;
+            let minCell = null;
+            
+            priceCells.forEach(cell => {
+                const priceText = cell.textContent.replace(/[^0-9]/g, '');
+                const price = parseInt(priceText);
+                if (price < minPrice) {
+                    minPrice = price;
+                    minCell = cell;
+                }
+            });
+            
+            if (minCell) {
+                minCell.style.backgroundColor = '#d4edda';
+                minCell.innerHTML += ' <i class="bi bi-trophy-fill text-success"></i>';
+            }
+        }
+
+        function highlightBestBattery() {
+            const batteryRow = document.querySelector('tr.table-success');
+            if (!batteryRow) return;
+            
+            const batteryCells = batteryRow.querySelectorAll('td:not(:first-child)');
+            let maxBattery = -1;
+            let maxCell = null;
+            
+            batteryCells.forEach(cell => {
+                const badge = cell.querySelector('.badge');
+                if (badge) {
+                    const battery = parseInt(badge.textContent);
+                    if (battery > maxBattery) {
+                        maxBattery = battery;
+                        maxCell = cell;
+                    }
+                }
+            });
+            
+            if (maxCell) {
+                maxCell.style.backgroundColor = '#d4edda';
+                maxCell.innerHTML += ' <i class="bi bi-trophy-fill text-success"></i>';
+            }
+        }
+    </script>
+}

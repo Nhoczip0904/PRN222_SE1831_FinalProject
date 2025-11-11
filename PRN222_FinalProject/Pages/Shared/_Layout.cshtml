@@ -1,0 +1,190 @@
+@using BLL.DTOs
+@using BLL.Helpers
+@using System.Linq
+@{
+    var currentUser = Context.Session.GetObjectFromJson<UserDto>("CurrentUser");
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="user-role" content="@(currentUser?.Role ?? "")" />
+    <title>@ViewData["Title"] - EV Battery Trading</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/PRN222_FinalProject.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-page="/Index">
+                    <i class="bi bi-battery-charging"></i> EV Battery Trading
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="" asp-page="/Index">
+                                <i class="bi bi-house"></i> Trang chủ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-page="/Products/Index">
+                                <i class="bi bi-shop"></i> Sản phẩm
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-page="/Auctions/Index">
+                                <i class="bi bi-hammer"></i> Đấu giá
+                            </a>
+                        </li>
+                        @if (currentUser != null)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-page="/Wallet/Index">
+                                    <i class="bi bi-wallet2"></i> Ví của tôi
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-page="/Products/MyProducts">
+                                    <i class="bi bi-box-seam"></i> Sản phẩm của tôi
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-page="/Auctions/MyAuctions">
+                                    <i class="bi bi-hammer"></i> Đấu giá của tôi
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-page="/Orders/Index">
+                                    <i class="bi bi-receipt"></i> Đơn hàng
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-page="/Transactions/Index">
+                                    <i class="bi bi-clock-history"></i> Lịch sử GD
+                                </a>
+                            </li>
+                        }
+                        @if (currentUser?.Role == "admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-page="/Admin/Dashboard">
+                                    <i class="bi bi-speedometer2"></i> Admin Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-page="/Admin/Users/Index">
+                                    <i class="bi bi-people"></i> Quản lý người dùng
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-page="/Admin/Auctions/Index">
+                                    <i class="bi bi-hammer"></i> Quản lý đấu giá
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav">
+                        @if (currentUser != null)
+                        {
+                            <!-- Notification Bell -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-white position-relative dropdown-toggle" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-bell-fill"></i>
+                                    <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display: none;">
+                                        0
+                                    </span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="width: 350px; max-height: 400px; overflow-y: auto;">
+                                    <li class="dropdown-header d-flex justify-content-between align-items-center">
+                                        <span>Thông báo</span>
+                                        <button class="btn btn-sm btn-link text-decoration-none" onclick="clearAllNotifications()">Xóa tất cả</button>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <div id="notification-list" class="list-group list-group-flush">
+                                        <div class="text-center text-muted p-3">Không có thông báo</div>
+                                    </div>
+                                </ul>
+                            </li>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link text-white position-relative" asp-page="/Cart/Index">
+                                    <i class="bi bi-cart"></i> Giỏ hàng
+                                    @{
+                                        var cartCount = Context.Session.GetObjectFromJson<List<BLL.DTOs.CartItemDto>>("ShoppingCart")?.Sum(c => c.Quantity) ?? 0;
+                                    }
+                                    @if (cartCount > 0)
+                                    {
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            @cartCount
+                                        </span>
+                                    }
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle"></i> @currentUser.FullName
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" asp-page="/Account/Profile">
+                                        <i class="bi bi-person"></i> Thông tin cá nhân
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-page="/Account/Logout">
+                                        <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                                    </a></li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-page="/Account/Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-page="/Account/Register">
+                                    <i class="bi bi-person-plus"></i> Đăng ký
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - EV Battery Trading Platform - Nền tảng giao dịch pin xe điện thứ hai
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    @if (currentUser != null)
+    {
+        <!-- SignalR Client Library -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+        <!-- Notification Script -->
+        <script src="~/js/notification.js" asp-append-version="true"></script>
+    }
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

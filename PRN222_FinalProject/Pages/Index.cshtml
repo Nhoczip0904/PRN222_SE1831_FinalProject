@@ -1,0 +1,70 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<div class="text-center">
+    <h1 class="display-4">
+        <i class="bi bi-battery-charging text-primary"></i> 
+        Chào mừng đến với EV Battery Trading
+    </h1>
+    <p class="lead">Nền tảng giao dịch pin xe điện thứ hai uy tín và an toàn</p>
+    
+    @if (Model.CurrentUser != null)
+    {
+        <div class="alert alert-success mt-4">
+            <h4><i class="bi bi-person-check"></i> Xin chào, @Model.CurrentUser.FullName!</h4>
+            <p>Vai trò: <strong>@Model.CurrentUser.Role</strong></p>
+            <p>Trạng thái: 
+                <span class="badge @(Model.CurrentUser.IsVerified == true ? "bg-success" : "bg-warning")">
+                    @(Model.CurrentUser.IsVerified == true ? "Đã xác thực" : "Chưa xác thực")
+                </span>
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="mt-5">
+            <h3>Bắt đầu ngay hôm nay!</h3>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-3">
+                <a asp-page="/Account/Register" class="btn btn-primary btn-lg">
+                    <i class="bi bi-person-plus"></i> Đăng ký ngay
+                </a>
+                <a asp-page="/Account/Login" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-shield-check text-primary" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">An toàn & Bảo mật</h5>
+                <p class="card-text">Giao dịch được bảo mật với công nghệ mã hóa hiện đại</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-lightning-charge text-warning" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Nhanh chóng</h5>
+                <p class="card-text">Quy trình đăng ký và giao dịch đơn giản, nhanh chóng</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-people text-success" style="font-size: 3rem;"></i>
+                <h5 class="card-title mt-3">Cộng đồng lớn</h5>
+                <p class="card-text">Kết nối với hàng ngàn người dùng trên toàn quốc</p>
+            </div>
+        </div>
+    </div>
+</div>

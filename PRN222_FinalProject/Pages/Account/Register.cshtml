@@ -1,0 +1,79 @@
+@page
+@model PRN222_FinalProject.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Đăng ký tài khoản</h3>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.Message))
+                    {
+                        <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show" role="alert">
+                            @Model.Message
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form method="post">
+                        <div class="mb-3">
+                            <label asp-for="RegisterDto.Email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input asp-for="RegisterDto.Email" class="form-control" placeholder="example@email.com" />
+                            <span asp-validation-for="RegisterDto.Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RegisterDto.Phone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                            <input asp-for="RegisterDto.Phone" class="form-control" placeholder="0912345678" />
+                            <span asp-validation-for="RegisterDto.Phone" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RegisterDto.FullName" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                            <input asp-for="RegisterDto.FullName" class="form-control" placeholder="Nguyễn Văn A" />
+                            <span asp-validation-for="RegisterDto.FullName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RegisterDto.Address" class="form-label">Địa chỉ</label>
+                            <textarea asp-for="RegisterDto.Address" class="form-control" rows="2" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"></textarea>
+                            <span asp-validation-for="RegisterDto.Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RegisterDto.Password" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                            <input asp-for="RegisterDto.Password" type="password" class="form-control" />
+                            <small class="form-text text-muted">Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số</small>
+                            <span asp-validation-for="RegisterDto.Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="RegisterDto.ConfirmPassword" class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                            <input asp-for="RegisterDto.ConfirmPassword" type="password" class="form-control" />
+                            <span asp-validation-for="RegisterDto.ConfirmPassword" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Đăng ký</button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p>Đã có tài khoản? <a asp-page="/Account/Login">Đăng nhập ngay</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

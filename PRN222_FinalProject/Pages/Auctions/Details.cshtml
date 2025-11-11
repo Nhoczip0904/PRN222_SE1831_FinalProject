@@ -1,0 +1,232 @@
+@page
+@model PRN222_FinalProject.Pages.Auctions.DetailsModel
+@{
+    ViewData["Title"] = "Chi tiết đấu giá";
+}
+
+<div class="container mt-4">
+    @if (Model.Auction != null)
+    {
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Auctions/Index">Đấu giá</a></li>
+                <li class="breadcrumb-item active">@Model.Auction.ProductName</li>
+            </ol>
+        </nav>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show">
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <img src="@(Model.Auction.ProductImage ?? "/images/no-image.png")" class="card-img-top" alt="@Model.Auction.ProductName" style="max-height: 400px; object-fit: cover;">
+                    <div class="card-body">
+                        <h3>@Model.Auction.ProductName</h3>
+                        <p class="text-muted"><i class="bi bi-person"></i> Người bán: @Model.Auction.SellerName</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header @(Model.Auction.Status == "closed" ? "bg-success" : Model.Auction.IsExpired ? "bg-secondary" : "bg-primary") text-white">
+                        <h5 class="mb-0">
+                            @if (Model.Auction.Status == "closed")
+                            {
+                                <i class="bi bi-check-circle"></i> <text>Đã chốt</text>
+                            }
+                            else if (Model.Auction.IsExpired)
+                            {
+                                <i class="bi bi-clock-history"></i> <text>Đã hết hạn</text>
+                            }
+                            else
+                            {
+                                <i class="bi bi-hammer"></i> <text>Đang đấu giá</text>
+                            }
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <small class="text-muted">Giá khởi điểm:</small>
+                            <h5>@Model.Auction.StartingPrice.ToString("N0") VND</h5>
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="text-muted">Giá hiện tại:</small>
+                            <h3 class="text-primary">@(Model.Auction.CurrentPrice?.ToString("N0") ?? Model.Auction.StartingPrice.ToString("N0")) VND</h3>
+                        </div>
+
+                        @if (Model.Auction.ReservePrice.HasValue)
+                        {
+                            <div class="mb-3">
+                                <small class="text-muted">Giá dự trữ:</small>
+                                <p class="mb-0">@Model.Auction.ReservePrice.Value.ToString("N0") VND</p>
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <small class="text-muted"><i class="bi bi-people"></i> Số lượt đặt giá:</small>
+                            <h5>@Model.Auction.TotalBids lượt</h5>
+                        </div>
+
+                        <hr>
+
+                        <div class="mb-3">
+                            <small class="text-muted">Thời gian bắt đầu:</small>
+                            <p class="mb-0">@Model.Auction.StartTime.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="text-muted">Thời gian kết thúc:</small>
+                            <p class="mb-0">@Model.Auction.EndTime.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+
+                        @if (!Model.Auction.IsExpired && Model.Auction.Status == "active")
+                        {
+                            <div class="alert alert-warning">
+                                <i class="bi bi-clock"></i> 
+                                <strong>Thời gian còn lại: </strong>
+                                @if (Model.Auction.TimeRemaining.Days > 0)
+                                {
+                                    <span>@Model.Auction.TimeRemaining.Days ngày @Model.Auction.TimeRemaining.Hours giờ @Model.Auction.TimeRemaining.Minutes phút</span>
+                                }
+                                else if (Model.Auction.TimeRemaining.Hours > 0)
+                                {
+                                    <span>@Model.Auction.TimeRemaining.Hours giờ @Model.Auction.TimeRemaining.Minutes phút</span>
+                                }
+                                else
+                                {
+                                    <span>@Model.Auction.TimeRemaining.Minutes phút @Model.Auction.TimeRemaining.Seconds giây</span>
+                                }
+                            </div>
+                        }
+
+                        @if (Model.Auction.Status == "closed" && Model.Auction.WinnerName != null)
+                        {
+                            <div class="alert alert-success">
+                                <i class="bi bi-trophy"></i> <strong>Người thắng cuộc:</strong> @Model.Auction.WinnerName
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.CurrentUser != null && Model.CurrentUser.Id != Model.Auction.SellerId && !Model.Auction.IsExpired && Model.Auction.Status == "active")
+                {
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Đặt giá</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" asp-page-handler="PlaceBid">
+                                <input type="hidden" asp-for="PlaceBidDto.AuctionId" value="@Model.Auction.Id" />
+                                
+                                <div class="mb-3">
+                                    <label asp-for="PlaceBidDto.BidAmount" class="form-label">Số tiền đặt giá (VND) <span class="text-danger">*</span></label>
+                                    <input asp-for="PlaceBidDto.BidAmount" type="number" class="form-control form-control-lg" min="@((Model.Auction.CurrentPrice ?? Model.Auction.StartingPrice) + 1)" />
+                                    <span asp-validation-for="PlaceBidDto.BidAmount" class="text-danger"></span>
+                                    <small class="text-muted">Giá phải lớn hơn @((Model.Auction.CurrentPrice ?? Model.Auction.StartingPrice).ToString("N0")) VND</small>
+                                </div>
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="bi bi-hammer"></i> Đặt giá ngay
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                }
+                else if (Model.CurrentUser == null)
+                {
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        <a asp-page="/Account/Login">Đăng nhập</a> để tham gia đấu giá
+                    </div>
+                }
+                else if (Model.CurrentUser.Id == Model.Auction.SellerId)
+                {
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> Bạn là người bán, không thể đặt giá
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-list-ol"></i> Lịch sử đặt giá (@Model.Bids?.Count() ?? 0 lượt)</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Bids != null && Model.Bids.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Người đặt giá</th>
+                                            <th>Số tiền</th>
+                                            <th>Thời gian</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var bid in Model.Bids)
+                                        {
+                                            <tr class="@(bid.IsWinning ? "table-success" : "")">
+                                                <td>
+                                                    @bid.BidderName
+                                                    @if (bid.IsWinning)
+                                                    {
+                                                        <span class="badge bg-success ms-2">Đang dẫn đầu</span>
+                                                    }
+                                                </td>
+                                                <td><strong>@bid.BidAmount.ToString("N0") VND</strong></td>
+                                                <td>@bid.BidTime.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                                <td>
+                                                    @if (bid.IsWinning)
+                                                    {
+                                                        <i class="bi bi-trophy text-success"></i>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted text-center">Chưa có lượt đặt giá nào</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> Đấu giá không tồn tại
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

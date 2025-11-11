@@ -1,0 +1,198 @@
+@page "{orderId:int}"
+@model PRN222_FinalProject.Pages.Orders.ContractModel
+@{
+    ViewData["Title"] = "Hợp đồng mua bán";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3><i class="bi bi-file-earmark-text"></i> HỢP ĐỒNG MUA BÁN SẢN PHẨM</h3>
+                    <p class="mb-0">Số: @Model.Order?.Id.ToString("D6")</p>
+                </div>
+                <div class="card-body p-4" id="contractContent">
+                    <div class="text-center mb-4">
+                        <h5>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h5>
+                        <h6>Độc lập - Tự do - Hạnh phúc</h6>
+                        <p class="text-muted">@DateTime.Now.ToString("dd/MM/yyyy")</p>
+                    </div>
+
+                    <h5 class="text-center mb-4">HỢP ĐỒNG MUA BÁN PIN XE ĐIỆN</h5>
+
+                    <div class="mb-4">
+                        <h6><strong>I. CÁC BÊN THAM GIA HỢP ĐỒNG</strong></h6>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="border p-3 rounded">
+                                    <h6 class="text-primary"><i class="bi bi-person-badge"></i> BÊN BÁN (Bên A)</h6>
+                                    <p class="mb-1"><strong>Họ tên:</strong> @Model.Seller?.FullName</p>
+                                    <p class="mb-1"><strong>Email:</strong> @Model.Seller?.Email</p>
+                                    <p class="mb-1"><strong>Số điện thoại:</strong> @Model.Seller?.Phone</p>
+                                    <p class="mb-0"><strong>Địa chỉ:</strong> @Model.Seller?.Address</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="border p-3 rounded">
+                                    <h6 class="text-success"><i class="bi bi-person-check"></i> BÊN MUA (Bên B)</h6>
+                                    <p class="mb-1"><strong>Họ tên:</strong> @Model.Buyer?.FullName</p>
+                                    <p class="mb-1"><strong>Email:</strong> @Model.Buyer?.Email</p>
+                                    <p class="mb-1"><strong>Số điện thoại:</strong> @Model.Buyer?.Phone</p>
+                                    <p class="mb-0"><strong>Địa chỉ:</strong> @Model.Order?.ShippingAddress</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6><strong>II. NỘI DUNG HỢP ĐỒNG</strong></h6>
+                        
+                        <h6 class="mt-3">Điều 1: Đối tượng hợp đồng</h6>
+                        <p>Bên A đồng ý bán và Bên B đồng ý mua các sản phẩm sau:</p>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Tên sản phẩm</th>
+                                        <th>Tình trạng</th>
+                                        <th>Số lượng</th>
+                                        <th>Đơn giá</th>
+                                        <th>Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Model.OrderItems != null)
+                                    {
+                                        int stt = 1;
+                                        foreach (var item in Model.OrderItems)
+                                        {
+                                            <tr>
+                                                <td>@stt</td>
+                                                <td>@item.Product?.Name</td>
+                                                <td>@item.Product?.Condition</td>
+                                                <td>@item.Quantity</td>
+                                                <td>@item.UnitPrice.ToString("N0") VND</td>
+                                                <td>@((item.Quantity * item.UnitPrice).ToString("N0")) VND</td>
+                                            </tr>
+                                            stt++;
+                                        }
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-primary">
+                                        <td colspan="5" class="text-end"><strong>TỔNG CỘNG:</strong></td>
+                                        <td><strong>@Model.Order?.TotalAmount.ToString("N0") VND</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <h6 class="mt-3">Điều 2: Giá trị hợp đồng và phương thức thanh toán</h6>
+                        <ul>
+                            <li><strong>Tổng giá trị:</strong> @Model.Order?.TotalAmount.ToString("N0") VND</li>
+                            <li><strong>Phương thức thanh toán:</strong> COD / Chuyển khoản</li>
+                            <li><strong>Thời gian thanh toán:</strong> @Model.Order?.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</li>
+                        </ul>
+
+                        <h6 class="mt-3">Điều 3: Giao nhận hàng hóa</h6>
+                        <ul>
+                            <li><strong>Địa chỉ giao hàng:</strong> @Model.Order?.ShippingAddress</li>
+                            <li><strong>Thời gian giao hàng:</strong> Trong vòng 3-5 ngày làm việc kể từ ngày đặt hàng</li>
+                            <li><strong>Phí vận chuyển:</strong> Miễn phí</li>
+                        </ul>
+
+                        <h6 class="mt-3">Điều 4: Bảo hành và đổi trả</h6>
+                        <ul>
+                            <li>Sản phẩm được bảo hành theo quy định của nhà sản xuất</li>
+                            <li>Được đổi trả trong vòng 7 ngày nếu phát hiện lỗi từ nhà sản xuất</li>
+                            <li>Không áp dụng đổi trả đối với sản phẩm đã qua sử dụng hoặc hư hỏng do người mua</li>
+                        </ul>
+
+                        <h6 class="mt-3">Điều 5: Cam kết của các bên</h6>
+                        <p><strong>Bên A cam kết:</strong></p>
+                        <ul>
+                            <li>Sản phẩm đúng như mô tả, không gian lận về chất lượng</li>
+                            <li>Giao hàng đúng thời gian đã thỏa thuận</li>
+                            <li>Hỗ trợ khách hàng trong quá trình sử dụng</li>
+                        </ul>
+
+                        <p><strong>Bên B cam kết:</strong></p>
+                        <ul>
+                            <li>Thanh toán đầy đủ theo thỏa thuận</li>
+                            <li>Nhận hàng đúng thời gian</li>
+                            <li>Kiểm tra hàng hóa khi nhận</li>
+                        </ul>
+
+                        <h6 class="mt-3">Điều 6: Điều khoản chung</h6>
+                        <ul>
+                            <li>Hợp đồng có hiệu lực kể từ ngày ký</li>
+                            <li>Mọi tranh chấp sẽ được giải quyết thông qua thương lượng</li>
+                            <li>Hợp đồng được lập thành 02 bản có giá trị pháp lý như nhau</li>
+                        </ul>
+                    </div>
+
+                    <div class="row mt-5">
+                        <div class="col-md-6 text-center">
+                            <p><strong>ĐẠI DIỆN BÊN BÁN</strong></p>
+                            <p class="text-muted">(Ký và ghi rõ họ tên)</p>
+                            <div style="height: 80px;"></div>
+                            <p><strong>@Model.Seller?.FullName</strong></p>
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <p><strong>ĐẠI DIỆN BÊN MUA</strong></p>
+                            <p class="text-muted">(Ký và ghi rõ họ tên)</p>
+                            <div style="height: 80px;"></div>
+                            <p><strong>@Model.Buyer?.FullName</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <p class="text-muted small">
+                            <i class="bi bi-shield-check"></i> 
+                            Hợp đồng này được tạo tự động bởi hệ thống EV Battery Trading
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card-footer text-center">
+                    <button onclick="printContract()" class="btn btn-primary btn-lg">
+                        <i class="bi bi-printer"></i> In hợp đồng
+                    </button>
+                    <button onclick="downloadPDF()" class="btn btn-success btn-lg">
+                        <i class="bi bi-file-pdf"></i> Tải PDF
+                    </button>
+                    <a asp-page="/Orders/Details" asp-route-id="@Model.Order?.Id" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function printContract() {
+            window.print();
+        }
+
+        function downloadPDF() {
+            alert('Chức năng tải PDF đang được phát triển. Hiện tại bạn có thể dùng chức năng In và chọn "Save as PDF".');
+        }
+    </script>
+    <style>
+        @@media print {
+            .card-header, .card-footer, .btn {
+                display: none !important;
+            }
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+        }
+    </style>
+}

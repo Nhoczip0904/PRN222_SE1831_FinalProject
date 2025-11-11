@@ -1,0 +1,293 @@
+@page
+@model PRN222_FinalProject.Pages.Transactions.IndexModel
+@{
+    ViewData["Title"] = "Lịch sử giao dịch";
+}
+
+<div class="container mt-4">
+    <h2><i class="bi bi-clock-history"></i> Lịch sử giao dịch</h2>
+    <hr />
+
+    <!-- Filter tabs -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#all">
+                <i class="bi bi-list"></i> Tất cả
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#wallet">
+                <i class="bi bi-wallet2"></i> Giao dịch ví
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#orders">
+                <i class="bi bi-receipt"></i> Đơn hàng
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#auctions">
+                <i class="bi bi-hammer"></i> Đấu giá
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- All Transactions -->
+        <div id="all" class="tab-pane fade show active">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> Tất cả giao dịch</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.AllTransactions.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Thời gian</th>
+                                        <th>Loại</th>
+                                        <th>Nội dung</th>
+                                        <th class="text-end">Số tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var trans in Model.AllTransactions)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <small>@(trans.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "")</small>
+                                            </td>
+                                            <td>
+                                                @if (trans.Type == "wallet")
+                                                {
+                                                    <span class="badge bg-info"><i class="bi bi-wallet2"></i> Ví</span>
+                                                }
+                                                else if (trans.Type == "order")
+                                                {
+                                                    <span class="badge bg-success"><i class="bi bi-receipt"></i> Đơn hàng</span>
+                                                }
+                                                else if (trans.Type == "auction")
+                                                {
+                                                    <span class="badge bg-warning"><i class="bi bi-hammer"></i> Đấu giá</span>
+                                                }
+                                            </td>
+                                            <td>@trans.Description</td>
+                                            <td class="text-end">
+                                                @if (trans.Amount > 0)
+                                                {
+                                                    <span class="text-success"><strong>+@trans.Amount.ToString("N0") VND</strong></span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-danger"><strong>@trans.Amount.ToString("N0") VND</strong></span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (trans.Status == "completed")
+                                                {
+                                                    <span class="badge bg-success">Hoàn thành</span>
+                                                }
+                                                else if (trans.Status == "pending")
+                                                {
+                                                    <span class="badge bg-warning">Đang xử lý</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Thất bại</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (trans.Type == "order" && trans.ReferenceId.HasValue)
+                                                {
+                                                    <a asp-page="/Orders/Details" asp-route-id="@trans.ReferenceId" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye"></i> Chi tiết
+                                                    </a>
+                                                }
+                                                else if (trans.Type == "auction" && trans.ReferenceId.HasValue)
+                                                {
+                                                    <a asp-page="/Auctions/Details" asp-route-id="@trans.ReferenceId" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye"></i> Chi tiết
+                                                    </a>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Chưa có giao dịch nào.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Transactions -->
+        <div id="wallet" class="tab-pane fade">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-wallet2"></i> Giao dịch ví</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.WalletTransactions.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var trans in Model.WalletTransactions)
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">@trans.Description</h6>
+                                            <small class="text-muted">
+                                                <i class="bi bi-clock"></i> @trans.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                            </small>
+                                        </div>
+                                        <div class="text-end">
+                                            @if (trans.Amount > 0)
+                                            {
+                                                <h5 class="mb-0 text-success">+@trans.Amount.ToString("N0") VND</h5>
+                                            }
+                                            else
+                                            {
+                                                <h5 class="mb-0 text-danger">@trans.Amount.ToString("N0") VND</h5>
+                                            }
+                                            <small class="text-muted">Số dư: @trans.BalanceAfter.ToString("N0") VND</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Chưa có giao dịch ví nào.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Transactions -->
+        <div id="orders" class="tab-pane fade">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-receipt"></i> Giao dịch đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Orders.Any())
+                    {
+                        <div class="row g-3">
+                            @foreach (var order in Model.Orders)
+                            {
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h6 class="mb-0">Đơn hàng #@order.Id</h6>
+                                                @if (order.Status == "completed")
+                                                {
+                                                    <span class="badge bg-success">Hoàn thành</span>
+                                                }
+                                                else if (order.Status == "pending")
+                                                {
+                                                    <span class="badge bg-warning">Chờ xử lý</span>
+                                                }
+                                                else if (order.Status == "shipping")
+                                                {
+                                                    <span class="badge bg-info">Đang giao</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Đã hủy</span>
+                                                }
+                                            </div>
+                                            <p class="text-muted small mb-2">
+                                                <i class="bi bi-clock"></i> @order.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+                                            </p>
+                                            <p class="mb-2">
+                                                <strong>Tổng tiền:</strong> 
+                                                <span class="text-primary">@order.TotalAmount.ToString("N0") VND</span>
+                                            </p>
+                                            <p class="mb-2">
+                                                <strong>Thanh toán:</strong> @order.PaymentMethod
+                                            </p>
+                                            <a asp-page="/Orders/Details" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye"></i> Xem chi tiết
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Chưa có đơn hàng nào.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Auction Transactions -->
+        <div id="auctions" class="tab-pane fade">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-hammer"></i> Giao dịch đấu giá</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.AuctionTransactions.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var trans in Model.AuctionTransactions)
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">@trans.Description</h6>
+                                            <small class="text-muted">
+                                                <i class="bi bi-clock"></i> @(trans.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "")
+                                            </small>
+                                        </div>
+                                        <div class="text-end">
+                                            @if (trans.Amount > 0)
+                                            {
+                                                <h5 class="mb-0 text-success">+@trans.Amount.ToString("N0") VND</h5>
+                                            }
+                                            else
+                                            {
+                                                <h5 class="mb-0 text-danger">@trans.Amount.ToString("N0") VND</h5>
+                                            }
+                                            @if (trans.ReferenceId.HasValue)
+                                            {
+                                                <a asp-page="/Auctions/Details" asp-route-id="@trans.ReferenceId" class="btn btn-sm btn-link">
+                                                    Xem đấu giá
+                                                </a>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Chưa có giao dịch đấu giá nào.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

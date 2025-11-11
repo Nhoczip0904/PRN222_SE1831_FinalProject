@@ -1,0 +1,108 @@
+@page
+@model PRN222_FinalProject.Pages.Auctions.CreateModel
+@{
+    ViewData["Title"] = "Tạo đấu giá mới";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="bi bi-hammer"></i> Tạo đấu giá mới</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="mb-3">
+                            <label asp-for="CreateDto.ProductId" class="form-label">Sản phẩm <span class="text-danger">*</span></label>
+                            <select asp-for="CreateDto.ProductId" class="form-select" required>
+                                <option value="">-- Chọn sản phẩm --</option>
+                                @foreach (var product in Model.MyProducts)
+                                {
+                                    <option value="@product.Id">@product.Name - @product.Price.ToString("N0") VND</option>
+                                }
+                            </select>
+                            <span asp-validation-for="CreateDto.ProductId" class="text-danger"></span>
+                            <small class="text-muted">Chỉ hiển thị sản phẩm đang bán của bạn</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CreateDto.StartingPrice" class="form-label">Giá khởi điểm (VND) <span class="text-danger">*</span></label>
+                                <input asp-for="CreateDto.StartingPrice" type="number" class="form-control" min="1" />
+                                <span asp-validation-for="CreateDto.StartingPrice" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CreateDto.ReservePrice" class="form-label">Giá dự trữ (VND)</label>
+                                <input asp-for="CreateDto.ReservePrice" type="number" class="form-control" />
+                                <span asp-validation-for="CreateDto.ReservePrice" class="text-danger"></span>
+                                <small class="text-muted">Giá tối thiểu để chốt đấu giá</small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CreateDto.StartTime" class="form-label">Thời gian bắt đầu <span class="text-danger">*</span></label>
+                                <input asp-for="CreateDto.StartTime" type="datetime-local" class="form-control" />
+                                <span asp-validation-for="CreateDto.StartTime" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CreateDto.EndTime" class="form-label">Thời gian kết thúc <span class="text-danger">*</span></label>
+                                <input asp-for="CreateDto.EndTime" type="datetime-local" class="form-control" />
+                                <span asp-validation-for="CreateDto.EndTime" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> 
+                            <strong>Lưu ý:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Thời gian bắt đầu phải sau thời điểm hiện tại</li>
+                                <li>Thời gian kết thúc phải sau thời gian bắt đầu</li>
+                                <li>Giá dự trữ (nếu có) phải lớn hơn giá khởi điểm</li>
+                                <li>Sau khi đấu giá bắt đầu, bạn không thể hủy</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Tạo đấu giá
+                            </button>
+                            <a asp-page="/Auctions/MyAuctions" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Set min datetime for start time
+            var now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.querySelector('input[name="CreateDto.StartTime"]').min = now.toISOString().slice(0,16);
+            
+            // Validate reserve price > starting price
+            $('input[name="CreateDto.ReservePrice"]').on('input', function() {
+                var startingPrice = parseFloat($('input[name="CreateDto.StartingPrice"]').val());
+                var reservePrice = parseFloat($(this).val());
+                
+                if (reservePrice && startingPrice && reservePrice <= startingPrice) {
+                    $(this).addClass('is-invalid');
+                    $(this).next('.text-danger').text('Giá dự trữ phải lớn hơn giá khởi điểm');
+                } else {
+                    $(this).removeClass('is-invalid');
+                    $(this).next('.text-danger').text('');
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,173 @@
+@page
+@model PRN222_FinalProject.Pages.Admin.Contracts.IndexModel
+@{
+    ViewData["Title"] = "Duyệt hợp đồng";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-file-earmark-check"></i> Duyệt hợp đồng</h2>
+        <span class="badge bg-warning fs-5">@Model.PendingContracts.Count() hợp đồng chờ duyệt</span>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!Model.PendingContracts.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Không có hợp đồng nào đang chờ duyệt.
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var contract in Model.PendingContracts)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-warning">
+                            <h6 class="mb-0">
+                                <i class="bi bi-file-earmark-text"></i> Hợp đồng #@contract.ContractNumber
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <p class="mb-1"><strong>Đơn hàng:</strong> #@contract.OrderId</p>
+                                <p class="mb-1"><strong>Giá trị:</strong> <span class="text-primary">@contract.TotalAmount.ToString("N0") VND</span></p>
+                                <p class="mb-1"><strong>Ngày tạo:</strong> @contract.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6 class="text-muted">Thông tin các bên:</h6>
+                                <div class="small">
+                                    <p class="mb-1">
+                                        <i class="bi bi-person text-success"></i> 
+                                        <strong>Người mua:</strong> @contract.Buyer?.FullName
+                                        @if (contract.BuyerConfirmed)
+                                        {
+                                            <span class="badge bg-success">✓</span>
+                                        }
+                                    </p>
+                                    <p class="mb-0">
+                                        <i class="bi bi-shop text-primary"></i> 
+                                        <strong>Người bán:</strong> @contract.Seller?.FullName
+                                        @if (contract.SellerConfirmed)
+                                        {
+                                            <span class="badge bg-success">✓</span>
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info small mb-3">
+                                <i class="bi bi-info-circle"></i> 
+                                Cả 2 bên đã xác nhận hợp đồng
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-white">
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveModal-@contract.Id">
+                                    <i class="bi bi-check-circle"></i> Duyệt hợp đồng
+                                </button>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal-@contract.Id">
+                                    <i class="bi bi-x-circle"></i> Từ chối
+                                </button>
+                                @* <a asp-page="/Contracts/Details" asp-route-id="@contract.Id" class="btn btn-outline-primary" target="_blank"> *@
+                                @*     <i class="bi bi-eye"></i> Xem chi tiết *@
+                                @* </a> *@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Approve Modal -->
+                <div class="modal fade" id="approveModal-@contract.Id" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title"><i class="bi bi-check-circle"></i> Xác nhận duyệt hợp đồng</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="post" asp-page-handler="Approve">
+                                <div class="modal-body">
+                                    <input type="hidden" name="contractId" value="@contract.Id" />
+                                    <p>Bạn có chắc chắn muốn <strong class="text-success">DUYỆT</strong> hợp đồng này?</p>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6>Hợp đồng #@contract.ContractNumber</h6>
+                                            <p class="mb-1"><strong>Người mua:</strong> @contract.Buyer?.FullName</p>
+                                            <p class="mb-1"><strong>Người bán:</strong> @contract.Seller?.FullName</p>
+                                            <p class="mb-0"><strong>Giá trị:</strong> @contract.TotalAmount.ToString("N0") VND</p>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-warning mt-3">
+                                        <i class="bi bi-exclamation-triangle"></i> 
+                                        Sau khi duyệt, hợp đồng sẽ có hiệu lực pháp lý.
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-check-circle"></i> Xác nhận duyệt
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reject Modal -->
+                <div class="modal fade" id="rejectModal-@contract.Id" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title"><i class="bi bi-x-circle"></i> Từ chối hợp đồng</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="post" asp-page-handler="Reject">
+                                <div class="modal-body">
+                                    <input type="hidden" name="contractId" value="@contract.Id" />
+                                    <p>Bạn có chắc chắn muốn <strong class="text-danger">TỪ CHỐI</strong> hợp đồng này?</p>
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <h6>Hợp đồng #@contract.ContractNumber</h6>
+                                            <p class="mb-0">Giá trị: @contract.TotalAmount.ToString("N0") VND</p>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label"><strong>Lý do từ chối:</strong> <span class="text-danger">*</span></label>
+                                        <textarea name="reason" class="form-control" rows="3" required 
+                                                  placeholder="Nhập lý do từ chối (bắt buộc)..."></textarea>
+                                        <div class="form-text">Lý do này sẽ được gửi cho cả 2 bên</div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="bi bi-x-circle"></i> Xác nhận từ chối
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
