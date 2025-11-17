@@ -1,0 +1,112 @@
+@page
+@model PRN222_FinalProject.Pages.Products.DetailsAdminModel
+@{
+
+    ViewData["Title"] = Model.Product?.Name ?? "Chi tiết sản phẩm";
+
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+    @if (Model.Product != null)
+    {
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Admin/Products/Pending">Sản phẩm Chờ Duyệt</a></li>
+                <li class="breadcrumb-item active">@Model.Product.Name</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <div class="col-md-6">
+                @{
+                    var images = Model.Product.Images?.Split(',').ToList() ?? new List<string> { "/images/no-image.png" };
+                }
+                <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        @for (int i = 0; i < images.Count; i++)
+                        {
+                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                <img src="@images[i]" class="d-block w-100" alt="@Model.Product.Name" style="height: 400px; object-fit: cover;">
+                            </div>
+                        }
+                    </div>
+                    @if (images.Count > 1)
+                    {
+                        <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <h2>@Model.Product.Name</h2>
+                <p class="text-muted">
+                    <i class="bi bi-tag"></i> @Model.Product.CategoryName
+                </p>
+
+                <h3 class="text-primary">@Model.Product.Price.ToString("N0") VND</h3>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5>Thông tin sản phẩm</h5>
+                        <table class="table table-sm">
+                            <tr>
+                                <th width="40%">Tình trạng pin:</th>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar @(Model.Product.BatteryHealthPercent >= 80 ? "bg-success" : Model.Product.BatteryHealthPercent >= 50 ? "bg-warning" : "bg-danger")" 
+                                             style="width: @Model.Product.BatteryHealthPercent%">
+                                            @Model.Product.BatteryHealthPercent%
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Tình trạng:</th>
+                                <td><span class="badge bg-info">@Model.Product.Condition</span></td>
+                            </tr>
+                            <tr>
+                                <th>Người bán:</th>
+                                <td><i class="bi bi-person"></i> @Model.Product.SellerName</td>
+                            </tr>
+                            <tr>
+                                <th>Ngày đăng:</th>
+                                <td>@Model.Product.CreatedAt?.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5>Mô tả</h5>
+                        <p>@Model.Product.Description</p>
+                    </div>
+                </div>
+
+                @if (Model.CurrentUser != null && Model.CurrentUser.Id != Model.Product.SellerId)
+                {
+                    
+                }
+                else if (Model.CurrentUser == null)
+                {
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        <a asp-page="/Account/Login">Đăng nhập</a> để mua sản phẩm
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> Sản phẩm không tồn tại
+        </div>
+    }
+</div>

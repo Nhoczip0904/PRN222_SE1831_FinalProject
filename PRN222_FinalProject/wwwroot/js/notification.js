@@ -32,11 +32,21 @@ connection.on("ReceiveNotification", (message, type, link) => {
 // Receive new product broadcast
 connection.on("NewProductAvailable", (product) => {
     console.log("New product available:", product);
-    
+
     // Show notification
     showNotification(product.message, "info", `/Products/Details?id=${product.productId}`);
-    
-    // Add product to homepage if user is on homepage
+
+    // Nếu là trang duyệt sản phẩm admin thì reload hoặc thêm vào bảng
+    if (window.location.pathname.includes("/Admin/Products/Pending")) {
+        // Cách 1: Reload lại trang (đơn giản, chắc chắn)
+        location.reload();
+
+        // Cách 2: (Tốt hơn) Gọi AJAX để lấy sản phẩm mới và thêm vào bảng mà không reload
+        // TODO: Viết hàm addProductToAdminTable(product) để thêm sản phẩm vào bảng duyệt
+        // addProductToAdminTable(product);
+    }
+
+    // Add product to homepage nếu đang ở homepage
     if (window.location.pathname === '/' || window.location.pathname === '/Index') {
         addProductToHomepage(product);
     }

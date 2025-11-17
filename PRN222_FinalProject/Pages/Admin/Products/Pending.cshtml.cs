@@ -59,7 +59,7 @@ public class PendingModel : PageModel
         {
             return RedirectToPage("/Account/Login");
         }
-
+        
         if (string.IsNullOrWhiteSpace(reason))
         {
             TempData["ErrorMessage"] = "Vui lòng nhập lý do từ chối!";

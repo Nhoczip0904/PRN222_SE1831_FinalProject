@@ -52,7 +52,7 @@ public class CreateModel : PageModel
             return Page();
         }
 
-        var result = await _productService.CreateProductAsync(currentUser.Id, CreateDto);
+        var result = await _productService.CreateProductAsync(currentUser.Id, CreateDto, currentUser.FullName);
 
         if (result.Success)
         {

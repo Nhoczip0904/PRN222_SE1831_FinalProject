@@ -14,7 +14,7 @@ public interface IProductService
     Task<IEnumerable<ProductDto>> GetProductsByCategoryIdAsync(int categoryId);
     Task<IEnumerable<ProductDto>> SearchProductsAsync(ProductSearchDto searchDto);
     Task<(IEnumerable<ProductDto> Products, int TotalCount, int TotalPages)> GetProductsWithPaginationAsync(ProductSearchDto searchDto);
-    Task<(bool Success, string Message, int? ProductId)> CreateProductAsync(int sellerId, CreateProductDto createDto);
+    Task<(bool Success, string Message, int? ProductId)> CreateProductAsync(int sellerId, CreateProductDto createDto, String name);
     Task<(bool Success, string Message)> UpdateProductAsync(int productId, int sellerId, UpdateProductDto updateDto);
     Task<(bool Success, string Message)> DeleteProductAsync(int productId, int sellerId);
     Task<(bool Success, string Message)> DeactivateProductAsync(int productId, int sellerId);

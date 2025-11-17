@@ -1,3 +1,4 @@
+using BLL.DTOs;
 using BLL.Services;
 using Microsoft.AspNetCore.SignalR;
 using PRN222_FinalProject.Hubs;
@@ -115,7 +116,9 @@ public class NotificationService : INotificationService
 
     public async Task NotifyNewBidAsync(int sellerId, int auctionId, decimal bidAmount)
     {
-        var connectionId = NotificationHub.GetConnectionId(sellerId);
+        Console.WriteLine($"[DEBUG] Auction null với AuctionId: {NotificationHub.GetConnectionId(sellerId)}");
+    
+    var connectionId = NotificationHub.GetConnectionId(sellerId);
         if (connectionId != null)
         {
             await _hubContext.Clients.Client(connectionId).SendAsync(

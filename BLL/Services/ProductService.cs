@@ -104,7 +104,7 @@ public class ProductService : IProductService
         return (productDtos, totalCount, totalPages);
     }
 
-    public async Task<(bool Success, string Message, int? ProductId)> CreateProductAsync(int sellerId, CreateProductDto createDto)
+    public async Task<(bool Success, string Message, int? ProductId)> CreateProductAsync(int sellerId, CreateProductDto createDto, string sellerName)
     {
         // Validate category exists
         var category = await _categoryRepository.GetByIdAsync(createDto.CategoryId);
@@ -151,7 +151,7 @@ public class ProductService : IProductService
             CategoryId = createDto.CategoryId,
             Images = imageUrls,
             IsActive = false,
-            IsSold = false,        // Ẩn sản phẩm cho đến khi được duyệt
+            IsSold = true,        // Ẩn sản phẩm cho đến khi được duyệt
             ApprovalStatus = "pending", // Mặc định chờ duyệt
             CreatedAt = DateTime.Now,
             UpdatedAt = DateTime.Now
@@ -160,15 +160,11 @@ public class ProductService : IProductService
         var createdProduct = await _productRepository.CreateAsync(product);
 
         // Notify admin about new product pending approval
-        var seller = await _productRepository.GetByIdWithDetailsAsync(createdProduct.Id);
-        if (seller?.Seller != null)
-        {
-            await _notificationService.NotifyAdminNewProductAsync(
-                createdProduct.Id, 
-                createdProduct.Name, 
-                seller.Seller.FullName ?? "Unknown"
-            );
-        }
+        await _notificationService.NotifyAdminNewProductAsync(
+         createdProduct.Id,
+         createdProduct.Name,
+         sellerName ?? "Unknown" // Dùng tên được truyền vào
+     );
 
         return (true, "Đăng sản phẩm thành công. Đang chờ admin duyệt.", createdProduct.Id);
     }
@@ -362,7 +358,7 @@ public class ProductService : IProductService
         }
 
         product.ApprovalStatus = "approved";
-        product.IsSold = true;
+        product.IsSold = false;
         product.ApprovedBy = adminId;
         product.ApprovedAt = DateTime.Now;
         product.RejectionReason = null;

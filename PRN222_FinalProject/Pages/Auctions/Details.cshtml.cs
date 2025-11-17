@@ -1,8 +1,9 @@
-using BLL.Helpers;
+﻿using BLL.Helpers;
 using BLL.Services;
 using BLL.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using PRN222_FinalProject.Services; // Add this for INotificationService
 
 namespace PRN222_FinalProject.Pages.Auctions;
 
@@ -10,11 +11,17 @@ public class DetailsModel : PageModel
 {
     private readonly IAuctionService _auctionService;
     private readonly IBidService _bidService;
+    private readonly INotificationService _notificationService; // Use the notification service
 
-    public DetailsModel(IAuctionService auctionService, IBidService bidService)
+    public DetailsModel(
+        IAuctionService auctionService,
+        IBidService bidService,
+        INotificationService notificationService // Inject here
+    )
     {
         _auctionService = auctionService;
         _bidService = bidService;
+        _notificationService = notificationService;
     }
 
     public AuctionDto? Auction { get; set; }
@@ -60,6 +67,25 @@ public class DetailsModel : PageModel
         if (result.Success)
         {
             TempData["SuccessMessage"] = result.Message;
+
+            // Lấy auction
+            var auction = await _auctionService.GetAuctionByIdAsync(PlaceBidDto.AuctionId);
+
+            // ❗️ KIỂM TRA NULL BẮT BUỘC ❗️
+            if (auction == null)
+            {
+                // Ghi log lỗi nếu cần
+                // _logger.LogError($"Không tìm thấy auction {PlaceBidDto.AuctionId} để gửi thông báo.");
+            }
+            else
+            {
+                // Chỉ gửi thông báo nếu auction tồn tại
+                await _notificationService.NotifyNewBidAsync(
+                    auction.SellerId,
+                    auction.Id,
+                    PlaceBidDto.BidAmount
+                );
+            }
         }
         else
         {
