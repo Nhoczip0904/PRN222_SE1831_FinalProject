@@ -36,7 +36,7 @@ public class IndexModel : PageModel
         {
             // Get all active auctions and filter expired ones
             var allAuctions = await _auctionService.GetAllAuctionsAsync();
-            Auctions = allAuctions.Where(a => a.Status == "active" && a.IsExpired);
+            Auctions = allAuctions.Where(a => a.Status == "active" && a.ApprovalStatus == "approved" && a.IsExpired);
             TotalPages = 1;
         }
         else

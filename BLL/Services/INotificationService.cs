@@ -6,7 +6,7 @@ namespace BLL.Services;
 /// </summary>
 public interface INotificationService
 {
-    Task NotifyProductApprovalAsync(int sellerId, int productId, string productName, bool approved);
+    Task NotifyProductApprovalAsync(int sellerId, int productId, string productName, bool approved, string? reason = null);
     Task NotifyOrderStatusChangeAsync(int buyerId, int sellerId, int orderId, string newStatus);
     Task NotifyContractApprovalAsync(int buyerId, int sellerId, int contractId, bool approved);
     Task NotifyNewOrderAsync(int sellerId, int orderId, decimal amount);

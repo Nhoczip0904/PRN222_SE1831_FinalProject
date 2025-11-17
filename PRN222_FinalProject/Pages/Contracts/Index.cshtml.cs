@@ -1,7 +1,6 @@
 using BLL.Helpers;
 using BLL.Services;
 using BLL.DTOs;
-using DAL.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -16,7 +15,7 @@ public class IndexModel : PageModel
         _contractService = contractService;
     }
 
-    public List<Contract> Contracts { get; set; } = new();
+    public List<ContractListDto> Contracts { get; set; } = new();
 
     public async Task<IActionResult> OnGetAsync()
     {
@@ -26,7 +25,7 @@ public class IndexModel : PageModel
             return RedirectToPage("/Account/Login");
         }
 
-        Contracts = await _contractService.GetUserContractsAsync(currentUser.Id);
+        Contracts = await _contractService.GetUserContractsDtoAsync(currentUser.Id);
         return Page();
     }
 }

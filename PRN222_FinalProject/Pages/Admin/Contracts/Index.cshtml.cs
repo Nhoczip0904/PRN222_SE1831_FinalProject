@@ -1,7 +1,6 @@
 using BLL.Helpers;
 using BLL.Services;
 using BLL.DTOs;
-using DAL.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -16,24 +15,24 @@ public class IndexModel : PageModel
         _contractService = contractService;
     }
 
-    public List<Contract> PendingContracts { get; set; } = new();
+    public List<ContractListDto> PendingContracts { get; set; } = new();
 
     public async Task<IActionResult> OnGetAsync()
     {
         var currentUser = HttpContext.Session.GetObjectFromJson<UserDto>("CurrentUser");
-        if (currentUser == null || currentUser.Role != "admin")
+        if (currentUser == null || (currentUser.Role != "admin" && currentUser.Role != "staff"))
         {
             return RedirectToPage("/Account/Login");
         }
 
-        PendingContracts = await _contractService.GetPendingContractsAsync();
+        PendingContracts = await _contractService.GetPendingContractsDtoAsync();
         return Page();
     }
 
     public async Task<IActionResult> OnPostApproveAsync(int contractId)
     {
         var currentUser = HttpContext.Session.GetObjectFromJson<UserDto>("CurrentUser");
-        if (currentUser == null || currentUser.Role != "admin")
+        if (currentUser == null || (currentUser.Role != "admin" && currentUser.Role != "staff"))
         {
             return RedirectToPage("/Account/Login");
         }
@@ -56,7 +55,7 @@ public class IndexModel : PageModel
     public async Task<IActionResult> OnPostRejectAsync(int contractId, string reason)
     {
         var currentUser = HttpContext.Session.GetObjectFromJson<UserDto>("CurrentUser");
-        if (currentUser == null || currentUser.Role != "admin")
+        if (currentUser == null || (currentUser.Role != "admin" && currentUser.Role != "staff"))
         {
             return RedirectToPage("/Account/Login");
         }

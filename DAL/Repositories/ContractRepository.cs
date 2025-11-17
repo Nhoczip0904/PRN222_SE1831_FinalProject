@@ -59,6 +59,16 @@ public class ContractRepository : IContractRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Contract>> GetAllAsync()
+    {
+        return await _context.Contracts
+            .Include(c => c.Order)
+            .Include(c => c.Buyer)
+            .Include(c => c.Seller)
+            .OrderBy(c => c.CreatedAt)
+            .ToListAsync();
+    }
+
     public async Task<bool> ExistsByOrderIdAsync(int orderId)
     {
         return await _context.Contracts.AnyAsync(c => c.OrderId == orderId);

@@ -81,6 +81,7 @@ public class ProductRepository : IProductRepository
     {
         return await _context.Products
             .Include(p => p.Category)
+            .Include(p => p.Seller)
             .Where(p => p.SellerId == sellerId)
             .OrderByDescending(p => p.CreatedAt)
             .ToListAsync();

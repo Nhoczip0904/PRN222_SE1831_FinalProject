@@ -53,7 +53,20 @@
                     {
                         <p class="mb-2"><i class="bi bi-person"></i> <strong>Người mua:</strong> @order.BuyerName</p>
                     }
-                    <p class="mb-2"><i class="bi bi-geo-alt"></i> <strong>Địa chỉ:</strong> @order.ShippingAddress</p>
+                    <p class="mb-2">
+                        <i class="bi bi-geo-alt"></i> <strong>Địa chỉ:</strong> 
+                        @order.ShippingAddress
+                        @if (order.PaymentMethod == "auction" && (order.Status == "pending" || order.Status == "confirmed"))
+                        {
+                            if (order.ShippingAddress == "Địa chỉ từ đấu giá - Vui lòng cập nhật")
+                            {
+                                <span class="badge bg-warning ms-2">Cần cập nhật</span>
+                            }
+                            <a href="/Orders/UpdateAddress/@order.Id" class="btn btn-sm btn-outline-primary ms-2">
+                                <i class="bi bi-pencil"></i> Cập nhật
+                            </a>
+                        }
+                    </p>
 
                     <hr>
 

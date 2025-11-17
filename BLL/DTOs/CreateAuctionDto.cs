@@ -14,6 +14,10 @@ public class CreateAuctionDto
     [Range(0.01, 999999999999, ErrorMessage = "Giá dự trữ phải lớn hơn 0")]
     public decimal? ReservePrice { get; set; }
 
+    [Required(ErrorMessage = "Bước giá là bắt buộc")]
+    [Range(1000, 999999999, ErrorMessage = "Bước giá phải từ 1,000 VND trở lên")]
+    public decimal BidIncrement { get; set; } = 10000;
+
     [Required(ErrorMessage = "Thời gian bắt đầu là bắt buộc")]
     public DateTime StartTime { get; set; }
 

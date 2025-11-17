@@ -46,6 +46,12 @@ public class DetailsModel : PageModel
         return Page();
     }
 
+    public async Task<PartialViewResult> OnGetBidsListAsync(int id)
+    {
+        var bids = await _bidService.GetBidsByAuctionIdAsync(id);
+        return Partial("_BidsList", bids);
+    }
+
     public async Task<IActionResult> OnPostPlaceBidAsync()
     {
         CurrentUser = HttpContext.Session.GetObjectFromJson<UserDto>("CurrentUser");

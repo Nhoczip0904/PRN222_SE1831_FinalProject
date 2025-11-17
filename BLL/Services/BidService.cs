@@ -1,4 +1,5 @@
 using BLL.DTOs;
+using BLL.Services;
 using DAL.Entities;
 using DAL.Repositories;
 
@@ -9,12 +10,14 @@ public class BidService : IBidService
     private readonly IBidRepository _bidRepository;
     private readonly IAuctionRepository _auctionRepository;
     private readonly IWalletService _walletService;
+    private readonly IAuctionNotificationService _notificationService;
 
-    public BidService(IBidRepository bidRepository, IAuctionRepository auctionRepository, IWalletService walletService)
+    public BidService(IBidRepository bidRepository, IAuctionRepository auctionRepository, IWalletService walletService, IAuctionNotificationService notificationService)
     {
         _bidRepository = bidRepository;
         _auctionRepository = auctionRepository;
         _walletService = walletService;
+        _notificationService = notificationService;
     }
 
     public async Task<IEnumerable<BidDto>> GetBidsByAuctionIdAsync(int auctionId)
@@ -76,6 +79,14 @@ public class BidService : IBidService
             return (false, $"Giá đặt phải lớn hơn giá hiện tại ({currentPrice:N0} VND)");
         }
 
+        // Check bid increment
+        var minimumIncrement = auction.BidIncrement;
+        var requiredMinimumBid = currentPrice + minimumIncrement;
+        if (placeBidDto.BidAmount < requiredMinimumBid)
+        {
+            return (false, $"Giá đặt phải tăng ít nhất {minimumIncrement:N0} VND. Giá tối thiểu: {requiredMinimumBid:N0} VND");
+        }
+
         // Check wallet balance
         var balanceCheck = await _walletService.CheckBalanceAsync(bidderId, placeBidDto.BidAmount);
         if (!balanceCheck.Success)
@@ -102,6 +113,22 @@ public class BidService : IBidService
         };
 
         await _bidRepository.CreateAsync(bid);
+
+        // Update auction current price
+        auction.CurrentPrice = placeBidDto.BidAmount;
+        auction.UpdatedAt = DateTime.Now;
+        await _auctionRepository.UpdateAsync(auction);
+
+        // Send real-time update to all clients
+        var auctionUpdateData = new
+        {
+            currentPrice = auction.CurrentPrice,
+            totalBids = (await _bidRepository.GetByAuctionIdAsync(placeBidDto.AuctionId)).Count(),
+            lastBidAmount = placeBidDto.BidAmount,
+            lastBidTime = DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")
+        };
+        
+        await _notificationService.SendAuctionUpdateAsync(placeBidDto.AuctionId, auctionUpdateData);
 
         return (true, "Đặt giá thành công");
     }

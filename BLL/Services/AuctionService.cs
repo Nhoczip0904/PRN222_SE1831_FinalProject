@@ -59,6 +59,20 @@ public class AuctionService : IAuctionService
         return auctionDtos;
     }
 
+    public async Task<IEnumerable<AuctionDto>> GetPendingAuctionsAsync()
+    {
+        var auctions = await _auctionRepository.GetPendingAuctionsAsync();
+        var auctionDtos = new List<AuctionDto>();
+
+        foreach (var auction in auctions)
+        {
+            var bidCount = await _bidRepository.GetBidCountAsync(auction.Id);
+            auctionDtos.Add(MapToAuctionDto(auction, bidCount));
+        }
+
+        return auctionDtos;
+    }
+
     public async Task<IEnumerable<AuctionDto>> GetAuctionsBySellerIdAsync(int sellerId)
     {
         var auctions = await _auctionRepository.GetBySellerIdAsync(sellerId);
@@ -132,9 +146,11 @@ public class AuctionService : IAuctionService
             StartingPrice = createDto.StartingPrice,
             CurrentPrice = createDto.StartingPrice,
             ReservePrice = createDto.ReservePrice,
+            BidIncrement = createDto.BidIncrement,
             StartTime = createDto.StartTime,
             EndTime = createDto.EndTime,
-            Status = "active"
+            Status = "pending",
+            ApprovalStatus = "pending"
         };
 
         var createdAuction = await _auctionRepository.CreateAsync(auction);
@@ -143,7 +159,7 @@ public class AuctionService : IAuctionService
         product.IsActive = false;
         await _productRepository.UpdateAsync(product);
 
-        return (true, "Tạo đấu giá thành công. Sản phẩm đã bị khóa trong thời gian đấu giá", createdAuction.Id);
+        return (true, "Tạo đấu giá thành công. Đang chờ phê duyệt từ admin/staff. Sản phẩm đã bị khóa trong thời gian chờ duyệt", createdAuction.Id);
     }
 
     public async Task<(bool Success, string Message)> CloseAuctionAsync(int auctionId, int adminId)
@@ -235,7 +251,18 @@ public class AuctionService : IAuctionService
         var balanceCheck = await _walletService.CheckBalanceAsync(winnerId, selectedBid.BidAmount);
         if (!balanceCheck.Success)
         {
-            return (false, $"Người thắng không đủ số dư. {balanceCheck.Message}");
+            // Cancel auction and unlock product since winner cannot pay
+            await _auctionRepository.CancelAuctionAsync(auctionId);
+            
+            // Unlock product
+            var product = await _productRepository.GetByIdAsync(auction.ProductId);
+            if (product != null)
+            {
+                product.IsActive = true;
+                await _productRepository.UpdateAsync(product);
+            }
+            
+            return (false, $"Người thắng không đủ số dư. Đấu giá đã bị hủy và sản phẩm đã được mở khóa. {balanceCheck.Message}");
         }
 
         // Deduct money from winner's wallet (hold in system until delivery confirmed)
@@ -249,7 +276,18 @@ public class AuctionService : IAuctionService
 
         if (!deductResult.Success)
         {
-            return (false, deductResult.Message);
+            // Cancel auction and unlock product since payment failed
+            await _auctionRepository.CancelAuctionAsync(auctionId);
+            
+            // Unlock product
+            var product = await _productRepository.GetByIdAsync(auction.ProductId);
+            if (product != null)
+            {
+                product.IsActive = true;
+                await _productRepository.UpdateAsync(product);
+            }
+            
+            return (false, $"Thanh toán thất bại. Đấu giá đã bị hủy và sản phẩm đã được mở khóa. {deductResult.Message}");
         }
 
         // Money will be split 75/25 after buyer confirms delivery
@@ -259,11 +297,16 @@ public class AuctionService : IAuctionService
         await _auctionRepository.CloseAuctionAsync(auctionId, winnerId);
 
         // Get product details for order
-        var product = await _productRepository.GetByIdWithDetailsAsync(auction.ProductId);
-        if (product == null)
+        var auctionProduct = await _productRepository.GetByIdWithDetailsAsync(auction.ProductId);
+        if (auctionProduct == null)
         {
             return (false, "Không tìm thấy sản phẩm");
         }
+
+        // Mark product as sold
+        auctionProduct.IsSold = true;
+        auctionProduct.UpdatedAt = DateTime.Now;
+        await _productRepository.UpdateAsync(auctionProduct);
 
         // Create order automatically with auction price
         var createOrderDto = new CreateOrderDto
@@ -278,12 +321,12 @@ public class AuctionService : IAuctionService
             new CartItemDto
             {
                 ProductId = auction.ProductId,
-                ProductName = product.Name,
+                ProductName = auctionProduct.Name,
                 Price = selectedBid.BidAmount, // Use actual auction price
                 Quantity = 1,
-                Image = product.Images?.Split(',').FirstOrDefault(),
+                Image = auctionProduct.Images?.Split(',').FirstOrDefault(),
                 SellerId = auction.SellerId,
-                SellerName = product.Seller?.FullName ?? "Unknown",
+                SellerName = auctionProduct.Seller?.FullName ?? "Unknown",
                 IsAvailable = true
             }
         };
@@ -434,6 +477,71 @@ public class AuctionService : IAuctionService
         }
     }
 
+    public async Task<(bool Success, string Message)> ApproveAuctionAsync(int auctionId, int approvedById)
+    {
+        var auction = await _auctionRepository.GetByIdAsync(auctionId);
+        
+        if (auction == null)
+        {
+            return (false, "Đấu giá không tồn tại");
+        }
+
+        if (auction.ApprovalStatus != "pending")
+        {
+            return (false, "Đấu giá đã được phê duyệt hoặc từ chối");
+        }
+
+        // Update auction
+        auction.ApprovalStatus = "approved";
+        auction.ApprovedById = approvedById;
+        auction.ApprovalReason = null;
+        auction.Status = "active"; // Activate auction
+        auction.UpdatedAt = DateTime.Now;
+
+        await _auctionRepository.UpdateAsync(auction);
+
+        return (true, "Đã phê duyệt đấu giá thành công");
+    }
+
+    public async Task<(bool Success, string Message)> RejectAuctionAsync(int auctionId, int approvedById, string reason)
+    {
+        var auction = await _auctionRepository.GetByIdAsync(auctionId);
+        
+        if (auction == null)
+        {
+            return (false, "Đấu giá không tồn tại");
+        }
+
+        if (auction.ApprovalStatus != "pending")
+        {
+            return (false, "Đấu giá đã được phê duyệt hoặc từ chối");
+        }
+
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            return (false, "Vui lòng cung cấp lý do từ chối");
+        }
+
+        // Update auction
+        auction.ApprovalStatus = "cancelled";
+        auction.ApprovedById = approvedById;
+        auction.ApprovalReason = reason;
+        auction.Status = "cancelled";
+        auction.UpdatedAt = DateTime.Now;
+
+        await _auctionRepository.UpdateAsync(auction);
+
+        // Unlock product
+        var product = await _productRepository.GetByIdAsync(auction.ProductId);
+        if (product != null)
+        {
+            product.IsActive = true;
+            await _productRepository.UpdateAsync(product);
+        }
+
+        return (true, "Đã từ chối đấu giá");
+    }
+
     private AuctionDto MapToAuctionDto(Auction auction, int bidCount)
     {
         var firstImage = auction.Product?.Images?.Split(',').FirstOrDefault();
@@ -449,9 +557,14 @@ public class AuctionService : IAuctionService
             StartingPrice = auction.StartingPrice,
             CurrentPrice = auction.CurrentPrice,
             ReservePrice = auction.ReservePrice,
+            BidIncrement = auction.BidIncrement,
             StartTime = auction.StartTime,
             EndTime = auction.EndTime,
             Status = auction.Status,
+            ApprovalStatus = auction.ApprovalStatus,
+            ApprovedById = auction.ApprovedById,
+            ApprovedByName = auction.ApprovedBy?.FullName,
+            ApprovalReason = auction.ApprovalReason,
             WinnerId = auction.WinnerId,
             WinnerName = auction.Winner?.FullName,
             TotalBids = bidCount,

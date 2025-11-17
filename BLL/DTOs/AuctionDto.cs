@@ -11,9 +11,16 @@ public class AuctionDto
     public decimal StartingPrice { get; set; }
     public decimal? CurrentPrice { get; set; }
     public decimal? ReservePrice { get; set; }
+
+    public decimal BidIncrement { get; set; }
+
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public string Status { get; set; } = null!;
+    public string ApprovalStatus { get; set; } = "pending";
+    public int? ApprovedById { get; set; }
+    public string? ApprovedByName { get; set; }
+    public string? ApprovalReason { get; set; }
     public int? WinnerId { get; set; }
     public string? WinnerName { get; set; }
     public int TotalBids { get; set; }

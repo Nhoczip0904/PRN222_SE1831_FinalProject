@@ -1,5 +1,6 @@
 using DAL.Entities;
 using DAL.Repositories;
+using BLL.DTOs;
 
 namespace BLL.Services;
 
@@ -16,6 +17,13 @@ public interface IContractService
     Task<List<Contract>> GetPendingContractsAsync();
     Task<List<Contract>> GetUserContractsAsync(int userId);
     Task<bool> IsContractApprovedAsync(int orderId);
+    
+    // DTO methods
+    Task<List<ContractListDto>> GetPendingContractsDtoAsync();
+    Task<List<ContractListDto>> GetAllContractsAsync();
+    Task<List<ContractListDto>> GetUserContractsDtoAsync(int userId);
+    Task<ContractDetailsDto?> GetContractDetailsByIdAsync(int contractId);
+    Task<SimpleContractDto?> GetContractByOrderIdDtoAsync(int orderId);
 }
 
 public class ContractService : IContractService
@@ -286,5 +294,105 @@ public class ContractService : IContractService
         var contract = await _contractRepository.GetByOrderIdAsync(orderId);
         
         return contract != null && contract.Status == "approved" && contract.AdminApproved;
+    }
+    
+    // DTO methods
+    public async Task<List<ContractListDto>> GetPendingContractsDtoAsync()
+    {
+        var contracts = await _contractRepository.GetPendingContractsAsync();
+        return contracts.Select(MapToContractListDto).ToList();
+    }
+
+    public async Task<List<ContractListDto>> GetAllContractsAsync()
+    {
+        var contracts = await _contractRepository.GetAllAsync();
+        return contracts.Select(MapToContractListDto).ToList();
+    }
+
+    public async Task<List<ContractListDto>> GetUserContractsDtoAsync(int userId)
+    {
+        var contracts = await _contractRepository.GetByUserIdAsync(userId);
+        return contracts.Select(MapToContractListDto).ToList();
+    }
+    
+    public async Task<ContractDetailsDto?> GetContractDetailsByIdAsync(int contractId)
+    {
+        var contract = await _contractRepository.GetByIdAsync(contractId);
+        if (contract == null)
+            return null;
+            
+        return MapToContractDetailsDto(contract);
+    }
+    
+    public async Task<SimpleContractDto?> GetContractByOrderIdDtoAsync(int orderId)
+    {
+        var contract = await _contractRepository.GetByOrderIdAsync(orderId);
+        if (contract == null)
+            return null;
+            
+        return new SimpleContractDto
+        {
+            Id = contract.Id,
+            Status = contract.Status,
+            CreatedAt = contract.CreatedAt,
+            UpdatedAt = contract.UpdatedAt
+        };
+    }
+    
+    private ContractListDto MapToContractListDto(Contract contract)
+    {
+        return new ContractListDto
+        {
+            Id = contract.Id,
+            OrderId = contract.OrderId,
+            BuyerId = contract.BuyerId,
+            BuyerName = contract.Buyer?.FullName ?? "Unknown",
+            SellerId = contract.SellerId,
+            SellerName = contract.Seller?.FullName ?? "Unknown",
+            OrderAmount = contract.TotalAmount,
+            Status = contract.Status,
+            CreatedAt = contract.CreatedAt,
+            UpdatedAt = contract.UpdatedAt,
+            BuyerConfirmed = contract.BuyerConfirmed,
+            SellerConfirmed = contract.SellerConfirmed,
+            AdminApproved = contract.AdminApproved
+        };
+    }
+    
+    private ContractDetailsDto MapToContractDetailsDto(Contract contract)
+    {
+        return new ContractDetailsDto
+        {
+            Id = contract.Id,
+            OrderId = contract.OrderId,
+            BuyerId = contract.BuyerId,
+            BuyerName = contract.Buyer?.FullName ?? "Unknown",
+            BuyerEmail = contract.Buyer?.Email,
+            BuyerPhone = contract.Buyer?.Phone,
+            BuyerAddress = contract.Buyer?.Address,
+            SellerId = contract.SellerId,
+            SellerName = contract.Seller?.FullName ?? "Unknown",
+            SellerEmail = contract.Seller?.Email,
+            SellerPhone = contract.Seller?.Phone,
+            SellerAddress = contract.Seller?.Address,
+            OrderAmount = contract.TotalAmount,
+            Status = contract.Status,
+            CreatedAt = contract.CreatedAt,
+            UpdatedAt = contract.UpdatedAt,
+            BuyerConfirmed = contract.BuyerConfirmed,
+            SellerConfirmed = contract.SellerConfirmed,
+            AdminApproved = contract.AdminApproved,
+            BuyerConfirmedAt = contract.BuyerConfirmedAt,
+            SellerConfirmedAt = contract.SellerConfirmedAt,
+            AdminApprovedAt = contract.AdminApprovedAt,
+            AdminApprovedBy = contract.AdminApprovedBy?.ToString(),
+            RejectionReason = contract.RejectionReason,
+            // These properties don't exist in the Contract entity, setting to null/default
+            RejectedAt = null,
+            RejectedBy = null,
+            BuyerIpAddress = null,
+            SellerIpAddress = null,
+            AdminIpAddress = null
+        };
     }
 }

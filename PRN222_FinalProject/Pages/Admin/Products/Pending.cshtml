@@ -159,3 +159,115 @@
         </div>
     }
 </div>
+
+<!-- Toast Notification Container -->
+<div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 1050;"></div>
+
+<!-- SignalR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    // Toast notification function
+    function showNotification(message, type = 'info') {
+        const toastContainer = document.getElementById('toastContainer');
+        const toastId = 'toast-' + Date.now();
+        
+        const bgClass = {
+            'info': 'bg-info',
+            'success': 'bg-success',
+            'warning': 'bg-warning',
+            'danger': 'bg-danger',
+            'error': 'bg-danger'
+        }[type] || 'bg-info';
+        
+        const icon = {
+            'info': 'bi-info-circle',
+            'success': 'bi-check-circle',
+            'warning': 'bi-exclamation-triangle',
+            'danger': 'bi-x-circle',
+            'error': 'bi-x-circle'
+        }[type] || 'bi-info-circle';
+        
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        toast.className = `toast show align-items-center text-white ${bgClass} border-0 mb-2`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+        toast.style.minWidth = '300px';
+        
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi ${icon} me-2"></i>${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            const toastElement = document.getElementById(toastId);
+            if (toastElement) {
+                toastElement.remove();
+            }
+        }, 5000);
+        
+        // Manual close button
+        toast.querySelector('.btn-close').addEventListener('click', () => {
+            toast.remove();
+        });
+    }
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/notificationHub")
+        .build();
+
+    connection.start().catch(err => console.error('SignalR connection error:', err));
+
+    // Listen for new product notifications
+    connection.on("ReceiveNotification", function (message, type, url) {
+        console.log('Notification received:', message, type, url);
+        
+        // Show toast notification
+        showNotification(message, type);
+        
+        // If it's a new product notification, refresh the page
+        if (message.includes('cần duyệt') && url.includes('/Admin/Products/')) {
+            console.log('New product pending approval, refreshing page...');
+            setTimeout(() => {
+                location.reload();
+            }, 2000); // Delay 2 seconds to allow admin to see the notification
+        }
+    });
+
+    // Function to refresh only the product list without full page reload
+    function refreshProductList() {
+        fetch(location.href, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Parse the HTML and update only the product grid
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newProductGrid = doc.querySelector('.row.g-3');
+            const currentProductGrid = document.querySelector('.row.g-3');
+            
+            if (newProductGrid && currentProductGrid) {
+                currentProductGrid.innerHTML = newProductGrid.innerHTML;
+                
+                // Update the product count badge
+                const newBadge = doc.querySelector('.badge.bg-warning');
+                const currentBadge = document.querySelector('.badge.bg-warning');
+                if (newBadge && currentBadge) {
+                    currentBadge.textContent = newBadge.textContent;
+                }
+            }
+        })
+        .catch(error => console.error('Error refreshing product list:', error));
+    }
+</script>

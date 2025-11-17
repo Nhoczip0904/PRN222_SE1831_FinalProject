@@ -10,7 +10,7 @@
             <div class="card shadow">
                 <div class="card-header bg-primary text-white text-center">
                     <h3><i class="bi bi-file-earmark-text"></i> HỢP ĐỒNG MUA BÁN SẢN PHẨM</h3>
-                    <p class="mb-0">Số: @Model.Order?.Id.ToString("D6")</p>
+                    <p class="mb-0">Số: @Model.Contract?.Id.ToString("D6")</p>
                 </div>
                 <div class="card-body p-4" id="contractContent">
                     <div class="text-center mb-4">
@@ -28,19 +28,19 @@
                             <div class="col-md-6">
                                 <div class="border p-3 rounded">
                                     <h6 class="text-primary"><i class="bi bi-person-badge"></i> BÊN BÁN (Bên A)</h6>
-                                    <p class="mb-1"><strong>Họ tên:</strong> @Model.Seller?.FullName</p>
-                                    <p class="mb-1"><strong>Email:</strong> @Model.Seller?.Email</p>
-                                    <p class="mb-1"><strong>Số điện thoại:</strong> @Model.Seller?.Phone</p>
-                                    <p class="mb-0"><strong>Địa chỉ:</strong> @Model.Seller?.Address</p>
+                                    <p class="mb-1"><strong>Họ tên:</strong> @Model.Contract?.SellerName</p>
+                                    <p class="mb-1"><strong>Email:</strong> @Model.Contract?.SellerEmail</p>
+                                    <p class="mb-1"><strong>Số điện thoại:</strong> @Model.Contract?.SellerPhone</p>
+                                    <p class="mb-0"><strong>Địa chỉ:</strong> @Model.Contract?.SellerAddress</p>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="border p-3 rounded">
                                     <h6 class="text-success"><i class="bi bi-person-check"></i> BÊN MUA (Bên B)</h6>
-                                    <p class="mb-1"><strong>Họ tên:</strong> @Model.Buyer?.FullName</p>
-                                    <p class="mb-1"><strong>Email:</strong> @Model.Buyer?.Email</p>
-                                    <p class="mb-1"><strong>Số điện thoại:</strong> @Model.Buyer?.Phone</p>
-                                    <p class="mb-0"><strong>Địa chỉ:</strong> @Model.Order?.ShippingAddress</p>
+                                    <p class="mb-1"><strong>Họ tên:</strong> @Model.Contract?.BuyerName</p>
+                                    <p class="mb-1"><strong>Email:</strong> @Model.Contract?.BuyerEmail</p>
+                                    <p class="mb-1"><strong>Số điện thoại:</strong> @Model.Contract?.BuyerPhone</p>
+                                    <p class="mb-0"><strong>Địa chỉ:</strong> @Model.Contract?.ShippingAddress</p>
                                 </div>
                             </div>
                         </div>
@@ -58,25 +58,23 @@
                                     <tr>
                                         <th>STT</th>
                                         <th>Tên sản phẩm</th>
-                                        <th>Tình trạng</th>
                                         <th>Số lượng</th>
                                         <th>Đơn giá</th>
                                         <th>Thành tiền</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if (Model.OrderItems != null)
+                                    @if (Model.Contract?.OrderItems != null)
                                     {
                                         int stt = 1;
-                                        foreach (var item in Model.OrderItems)
+                                        foreach (var item in Model.Contract.OrderItems)
                                         {
                                             <tr>
                                                 <td>@stt</td>
-                                                <td>@item.Product?.Name</td>
-                                                <td>@item.Product?.Condition</td>
+                                                <td>@item.ProductName</td>
                                                 <td>@item.Quantity</td>
                                                 <td>@item.UnitPrice.ToString("N0") VND</td>
-                                                <td>@((item.Quantity * item.UnitPrice).ToString("N0")) VND</td>
+                                                <td>@item.TotalPrice.ToString("N0") VND</td>
                                             </tr>
                                             stt++;
                                         }
@@ -84,8 +82,8 @@
                                 </tbody>
                                 <tfoot>
                                     <tr class="table-primary">
-                                        <td colspan="5" class="text-end"><strong>TỔNG CỘNG:</strong></td>
-                                        <td><strong>@Model.Order?.TotalAmount.ToString("N0") VND</strong></td>
+                                        <td colspan="4" class="text-end"><strong>TỔNG CỘNG:</strong></td>
+                                        <td><strong>@Model.Contract?.TotalAmount.ToString("N0") VND</strong></td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -93,14 +91,14 @@
 
                         <h6 class="mt-3">Điều 2: Giá trị hợp đồng và phương thức thanh toán</h6>
                         <ul>
-                            <li><strong>Tổng giá trị:</strong> @Model.Order?.TotalAmount.ToString("N0") VND</li>
-                            <li><strong>Phương thức thanh toán:</strong> COD / Chuyển khoản</li>
-                            <li><strong>Thời gian thanh toán:</strong> @Model.Order?.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</li>
+                            <li><strong>Tổng giá trị:</strong> @Model.Contract?.TotalAmount.ToString("N0") VND</li>
+                            <li><strong>Phương thức thanh toán:</strong> @Model.Contract?.PaymentMethod</li>
+                            <li><strong>Thời gian thanh toán:</strong> @Model.Contract?.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</li>
                         </ul>
 
                         <h6 class="mt-3">Điều 3: Giao nhận hàng hóa</h6>
                         <ul>
-                            <li><strong>Địa chỉ giao hàng:</strong> @Model.Order?.ShippingAddress</li>
+                            <li><strong>Địa chỉ giao hàng:</strong> @Model.Contract?.ShippingAddress</li>
                             <li><strong>Thời gian giao hàng:</strong> Trong vòng 3-5 ngày làm việc kể từ ngày đặt hàng</li>
                             <li><strong>Phí vận chuyển:</strong> Miễn phí</li>
                         </ul>
@@ -140,13 +138,13 @@
                             <p><strong>ĐẠI DIỆN BÊN BÁN</strong></p>
                             <p class="text-muted">(Ký và ghi rõ họ tên)</p>
                             <div style="height: 80px;"></div>
-                            <p><strong>@Model.Seller?.FullName</strong></p>
+                            <p><strong>@Model.Contract?.SellerName</strong></p>
                         </div>
                         <div class="col-md-6 text-center">
                             <p><strong>ĐẠI DIỆN BÊN MUA</strong></p>
                             <p class="text-muted">(Ký và ghi rõ họ tên)</p>
                             <div style="height: 80px;"></div>
-                            <p><strong>@Model.Buyer?.FullName</strong></p>
+                            <p><strong>@Model.Contract?.BuyerName</strong></p>
                         </div>
                     </div>
 
@@ -165,7 +163,7 @@
                     <button onclick="downloadPDF()" class="btn btn-success btn-lg">
                         <i class="bi bi-file-pdf"></i> Tải PDF
                     </button>
-                    <a asp-page="/Orders/Details" asp-route-id="@Model.Order?.Id" class="btn btn-outline-secondary btn-lg">
+                    <a asp-page="/Orders/Details" asp-route-id="@Model.Contract?.Id" class="btn btn-outline-secondary btn-lg">
                         <i class="bi bi-arrow-left"></i> Quay lại
                     </a>
                 </div>

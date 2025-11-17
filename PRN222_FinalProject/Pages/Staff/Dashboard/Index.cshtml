@@ -1,0 +1,276 @@
+@page
+@model PRN222_FinalProject.Pages.Staff.Dashboard.IndexModel
+@{
+    ViewData["Title"] = "Staff Dashboard";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
+        <span class="text-muted">Tổng quan hệ thống</span>
+    </div>
+
+    <!-- Dashboard Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Products Pending Approval -->
+        <div class="col-lg-2 col-md-4">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Sản phẩm chờ duyệt</h6>
+                            <h3 class="mb-0 text-warning">@Model.ProductsPendingApproval</h3>
+                            <small class="text-muted">Cần duyệt</small>
+                        </div>
+                        <div class="text-warning">
+                            <i class="bi bi-clock-history fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Approved -->
+        <div class="col-lg-2 col-md-4">
+            <div class="card border-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Sản phẩm đã duyệt</h6>
+                            <h3 class="mb-0 text-success">@Model.ProductsApproved</h3>
+                            <small class="text-muted">Đã duyệt</small>
+                        </div>
+                        <div class="text-success">
+                            <i class="bi bi-check-circle fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contracts Pending Approval -->
+        <div class="col-lg-2 col-md-4">
+            <div class="card border-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Hợp đồng chờ duyệt</h6>
+                            <h3 class="mb-0 text-info">@Model.ContractsPendingApproval</h3>
+                            <small class="text-muted">Cần duyệt</small>
+                        </div>
+                        <div class="text-info">
+                            <i class="bi bi-file-earmark-text fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Auctions -->
+        <div class="col-lg-2 col-md-4">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Đấu giá đang diễn ra</h6>
+                            <h3 class="mb-0 text-primary">@Model.ActiveAuctions</h3>
+                            <small class="text-muted">Hoạt động</small>
+                        </div>
+                        <div class="text-primary">
+                            <i class="bi bi-hammer fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Auctions Pending Approval -->
+        <div class="col-lg-2 col-md-4">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Đấu giá chờ duyệt</h6>
+                            <h3 class="mb-0 text-warning">@Model.AuctionsPendingApproval</h3>
+                            <small class="text-muted">Cần phê duyệt</small>
+                        </div>
+                        <div class="text-warning">
+                            <i class="bi bi-clock-history fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions (Disabled) -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-gear"></i> Chức năng quản lý</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a asp-page="/Staff/Categories/Index" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-tags"></i> Quản lý danh mục
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-secondary w-100" disabled>
+                                <i class="bi bi-box-seam"></i> Quản lý sản phẩm
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-secondary w-100" disabled>
+                                <i class="bi bi-file-earmark-check"></i> Duyệt hợp đồng
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-page="/Staff/Auctions/Pending" class="btn btn-outline-warning w-100">
+                                <i class="bi bi-clock-history"></i> Phê duyệt đấu giá
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-page="/Staff/Auctions/Index" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-gavel"></i> Quản lý đấu giá
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-secondary w-100" disabled>
+                                <i class="bi bi-people"></i> Quản lý người dùng
+                            </button>
+                        </div>
+                    </div>
+                    <div class="alert alert-success mt-3">
+                        <i class="bi bi-check-circle"></i> <strong>Lưu ý:</strong> Các chức năng quản lý danh mục và đấu giá đã được kích hoạt.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="bi bi-clock"></i> Sản phẩm gần đây</h5>
+                </div>
+                <h5 class="card-title mb-4">Sản phẩm gần đây</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Tên sản phẩm</th>
+                                <th>Người bán</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.RecentProducts != null && Model.RecentProducts.Any())
+                            {
+                                @foreach (var product in Model.RecentProducts)
+                                {
+                                    <tr>
+                                        <td>@product.Name</td>
+                                        <td>@product.SellerName</td>
+                                        <td>
+                                            @if (product.ApprovalStatus == "pending")
+                                            {
+                                                <span class="badge bg-warning">Chờ duyệt</span>
+                                            }
+                                            else if (product.ApprovalStatus == "approved")
+                                            {
+                                                <span class="badge bg-success">Đã duyệt</span>
+                                            }
+                                            else if (product.ApprovalStatus == "rejected")
+                                            {
+                                                <span class="badge bg-danger">Từ chối</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">@product.ApprovalStatus</span>
+                                            }
+                                        </td>
+                                        <td>@product.CreatedAt?.ToString("dd/MM/yyyy")</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">Chưa có sản phẩm nào</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-file-text"></i> Hợp đồng gần đây</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Mã hợp đồng</th>
+                                    <th>Người mua</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.RecentContracts != null && Model.RecentContracts.Any())
+                                {
+                                    @foreach (var contract in Model.RecentContracts.Take(5))
+                                    {
+                                        <tr>
+                                            <td>@contract.Id</td>
+                                            <td>@contract.BuyerName</td>
+                                            <td>
+                                                @if (contract.Status == "pending")
+                                                {
+                                                    <span class="badge bg-warning">Chờ duyệt</span>
+                                                }
+                                                else if (contract.Status == "approved")
+                                                {
+                                                    <span class="badge bg-success">Đã duyệt</span>
+                                                }
+                                                else if (contract.Status == "rejected")
+                                                {
+                                                    <span class="badge bg-danger">Từ chối</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">@contract.Status</span>
+                                                }
+                                            </td>
+                                            <td>@contract.CreatedAt?.ToString("dd/MM/yyyy")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">Không có hợp đồng nào</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

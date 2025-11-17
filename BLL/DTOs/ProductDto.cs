@@ -15,6 +15,9 @@ public class ProductDto
     public int? CategoryId { get; set; }
     public string? CategoryName { get; set; }
     public bool? IsActive { get; set; }
+    public bool? IsSold { get; set; }
+    public string? ApprovalStatus { get; set; }
+    public string? RejectionReason { get; set; }
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }

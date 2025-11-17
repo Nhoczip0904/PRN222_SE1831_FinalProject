@@ -30,7 +30,7 @@ public class CreateModel : PageModel
     public IActionResult OnGet()
     {
         var currentUser = HttpContext.Session.GetObjectFromJson<UserDto>("CurrentUser");
-        if (currentUser == null || currentUser.Role != "admin")
+        if (currentUser == null || (currentUser.Role != "admin" && currentUser.Role != "staff"))
         {
             return RedirectToPage("/Account/Login");
         }
@@ -45,7 +45,7 @@ public class CreateModel : PageModel
     public async Task<IActionResult> OnPostAsync()
     {
         var currentUser = HttpContext.Session.GetObjectFromJson<UserDto>("CurrentUser");
-        if (currentUser == null || currentUser.Role != "admin")
+        if (currentUser == null || (currentUser.Role != "admin" && currentUser.Role != "staff"))
         {
             return RedirectToPage("/Account/Login");
         }

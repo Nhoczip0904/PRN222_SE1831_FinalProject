@@ -24,6 +24,7 @@ public class AuctionRepository : IAuctionRepository
             .Include(a => a.Product)
             .Include(a => a.Seller)
             .Include(a => a.Winner)
+            .Include(a => a.ApprovedBy)
             .Include(a => a.Bids)
                 .ThenInclude(b => b.Bidder)
             .FirstOrDefaultAsync(a => a.Id == id);
@@ -35,6 +36,8 @@ public class AuctionRepository : IAuctionRepository
             .Include(a => a.Product)
             .Include(a => a.Seller)
             .Include(a => a.Winner)
+            .Include(a => a.ApprovedBy)
+            .Where(a => a.ApprovalStatus == "approved")
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
@@ -44,8 +47,20 @@ public class AuctionRepository : IAuctionRepository
         return await _context.Auctions
             .Include(a => a.Product)
             .Include(a => a.Seller)
-            .Where(a => a.Status == "active" && a.EndTime > DateTime.Now)
+            .Include(a => a.ApprovedBy)
+            .Where(a => a.Status == "active" && a.ApprovalStatus == "approved" && a.EndTime > DateTime.Now)
             .OrderBy(a => a.EndTime)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Auction>> GetPendingAuctionsAsync()
+    {
+        return await _context.Auctions
+            .Include(a => a.Product)
+            .Include(a => a.Seller)
+            .Include(a => a.ApprovedBy)
+            .Where(a => a.ApprovalStatus == "pending")
+            .OrderBy(a => a.CreatedAt)
             .ToListAsync();
     }
 
@@ -54,7 +69,8 @@ public class AuctionRepository : IAuctionRepository
         return await _context.Auctions
             .Include(a => a.Product)
             .Include(a => a.Winner)
-            .Where(a => a.SellerId == sellerId)
+            .Include(a => a.ApprovedBy)
+            .Where(a => a.SellerId == sellerId && a.ApprovalStatus == "approved")
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
@@ -63,7 +79,7 @@ public class AuctionRepository : IAuctionRepository
     {
         return await _context.Auctions
             .Include(a => a.Seller)
-            .Where(a => a.ProductId == productId)
+            .Where(a => a.ProductId == productId && a.ApprovalStatus == "approved")
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
@@ -78,7 +94,7 @@ public class AuctionRepository : IAuctionRepository
 
         if (!string.IsNullOrEmpty(status))
         {
-            query = query.Where(a => a.Status == status);
+            query = query.Where(a => a.Status == status && a.ApprovalStatus == "approved");
         }
 
         var totalCount = await query.CountAsync();

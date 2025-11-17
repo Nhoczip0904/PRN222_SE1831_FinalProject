@@ -1,7 +1,6 @@
 using BLL.Helpers;
 using BLL.Services;
 using BLL.DTOs;
-using DAL.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -21,7 +20,7 @@ public class IndexModel : PageModel
     }
 
     public IEnumerable<OrderDto>? Orders { get; set; }
-    public Dictionary<int, Contract?> OrderContracts { get; set; } = new();
+    public Dictionary<int, SimpleContractDto?> OrderContracts { get; set; } = new();
     public string ViewType { get; set; } = "buyer"; // buyer or seller
     public int PageNumber { get; set; } = 1;
     public int TotalPages { get; set; }
@@ -56,7 +55,7 @@ public class IndexModel : PageModel
         {
             foreach (var order in Orders)
             {
-                var contract = await _contractService.GetContractByOrderIdAsync(order.Id);
+                var contract = await _contractService.GetContractByOrderIdDtoAsync(order.Id);
                 OrderContracts[order.Id] = contract;
             }
         }

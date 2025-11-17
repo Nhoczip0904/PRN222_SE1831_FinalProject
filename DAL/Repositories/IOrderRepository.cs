@@ -16,6 +16,7 @@ public interface IOrderRepository
     Task<Order> CreateAsync(Order order);
     Task<Order> UpdateAsync(Order order);
     Task<bool> UpdateStatusAsync(int orderId, string status);
+    Task<bool> UpdateShippingAddressAsync(int orderId, string shippingAddress);
     Task<bool> DeleteAsync(int id);
     Task<int> GetTotalCountAsync();
 }

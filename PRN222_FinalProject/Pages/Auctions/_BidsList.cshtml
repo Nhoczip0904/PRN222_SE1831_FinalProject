@@ -1,0 +1,21 @@
+@model IEnumerable<BLL.DTOs.BidDto>
+
+<tbody>
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var bid in Model.OrderByDescending(b => b.BidTime))
+        {
+            <tr>
+                <td>@bid.BidderName</td>
+                <td class="text-end">@bid.BidAmount.ToString("N0") VND</td>
+                <td>@bid.BidTime.ToString("dd/MM/yyyy HH:mm:ss")</td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr>
+            <td colspan="3" class="text-center text-muted">Chưa có lượt đặt giá nào</td>
+        </tr>
+    }
+</tbody>

@@ -33,11 +33,17 @@
                                 <span asp-validation-for="CreateDto.StartingPrice" class="text-danger"></span>
                             </div>
 
-                            <div class="col-md-6 mb-3">
+                            <div class="mb-3">
                                 <label asp-for="CreateDto.ReservePrice" class="form-label">Giá dự trữ (VND)</label>
                                 <input asp-for="CreateDto.ReservePrice" type="number" class="form-control" />
                                 <span asp-validation-for="CreateDto.ReservePrice" class="text-danger"></span>
                                 <small class="text-muted">Giá tối thiểu để chốt đấu giá</small>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="CreateDto.BidIncrement" class="form-label">Bước giá (VND) <span class="text-danger">*</span></label>
+                                <input asp-for="CreateDto.BidIncrement" type="number" class="form-control" />
+                                <span asp-validation-for="CreateDto.BidIncrement" class="text-danger"></span>
+                                <small class="text-muted">Mức tăng tối thiểu giữa các lần đặt giá</small>
                             </div>
                         </div>
 
@@ -62,6 +68,7 @@
                                 <li>Thời gian bắt đầu phải sau thời điểm hiện tại</li>
                                 <li>Thời gian kết thúc phải sau thời gian bắt đầu</li>
                                 <li>Giá dự trữ (nếu có) phải lớn hơn giá khởi điểm</li>
+                                <li>Bước giá là mức tăng tối thiểu giữa các lần đặt giá</li>
                                 <li>Sau khi đấu giá bắt đầu, bạn không thể hủy</li>
                             </ul>
                         </div>

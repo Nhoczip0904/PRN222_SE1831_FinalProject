@@ -141,10 +141,12 @@ public class OrderService : IOrderService
             {
                 BuyerId = buyerId,
                 SellerId = sellerId,
+                OrderDate = DateTime.Now,
                 TotalAmount = orderTotal,
                 Status = "pending",
                 ShippingAddress = createDto.ShippingAddress,
-                PaymentMethod = "wallet",
+                PaymentMethod = createDto.PaymentMethod,
+                Note = createDto.Note,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
             };
@@ -290,8 +292,40 @@ public class OrderService : IOrderService
         }
 
         await _orderRepository.UpdateStatusAsync(orderId, "cancelled");
+        return (true, "Đã hủy đơn hàng thành công");
+    }
 
-        return (true, "Đã hủy đơn hàng");
+    public async Task<(bool Success, string Message)> UpdateShippingAddressAsync(int orderId, string shippingAddress)
+    {
+        if (string.IsNullOrWhiteSpace(shippingAddress))
+        {
+            return (false, "Địa chỉ giao hàng không được để trống");
+        }
+
+        var order = await _orderRepository.GetByIdAsync(orderId);
+        
+        if (order == null)
+        {
+            return (false, "Đơn hàng không tồn tại");
+        }
+
+        // Only allow address update for pending or confirmed orders
+        if (order.Status != "pending" && order.Status != "confirmed")
+        {
+            return (false, "Không thể cập nhật địa chỉ cho đơn hàng đã được xử lý");
+        }
+
+        await _orderRepository.UpdateShippingAddressAsync(orderId, shippingAddress);
+        return (true, "Cập nhật địa chỉ giao hàng thành công");
+    }
+
+    public async Task<ContractDto?> GetContractDetailsAsync(int orderId)
+    {
+        var order = await _orderRepository.GetByIdWithDetailsAsync(orderId);
+        if (order == null)
+            return null;
+
+        return MapToContractDto(order);
     }
 
     private OrderDto MapToOrderDto(Order order)
@@ -309,6 +343,42 @@ public class OrderService : IOrderService
             ShippingAddress = order.ShippingAddress,
             CreatedAt = order.CreatedAt,
             UpdatedAt = order.UpdatedAt,
+            OrderItems = order.OrderItems?.Select(oi => new OrderItemDto
+            {
+                Id = oi.Id,
+                OrderId = oi.OrderId,
+                ProductId = oi.ProductId,
+                ProductName = oi.Product?.Name ?? "Unknown",
+                Quantity = oi.Quantity,
+                UnitPrice = oi.UnitPrice,
+                CreatedAt = oi.CreatedAt
+            }).ToList() ?? new List<OrderItemDto>()
+        };
+    }
+
+    private ContractDto MapToContractDto(Order order)
+    {
+        return new ContractDto
+        {
+            Id = order.Id,
+            BuyerId = order.BuyerId,
+            BuyerName = order.Buyer?.FullName,
+            BuyerEmail = order.Buyer?.Email,
+            BuyerPhone = order.Buyer?.Phone,
+            BuyerAddress = order.Buyer?.Address,
+            SellerId = order.SellerId,
+            SellerName = order.Seller?.FullName,
+            SellerEmail = order.Seller?.Email,
+            SellerPhone = order.Seller?.Phone,
+            SellerAddress = order.Seller?.Address,
+            TotalAmount = order.TotalAmount,
+            Status = order.Status,
+            PaymentMethod = order.PaymentMethod,
+            ShippingAddress = order.ShippingAddress,
+            CreatedAt = order.CreatedAt,
+            UpdatedAt = order.UpdatedAt,
+            OrderDate = order.OrderDate,
+            Note = order.Note,
             OrderItems = order.OrderItems?.Select(oi => new OrderItemDto
             {
                 Id = oi.Id,

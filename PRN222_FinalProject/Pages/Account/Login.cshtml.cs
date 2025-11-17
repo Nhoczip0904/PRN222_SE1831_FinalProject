@@ -53,6 +53,10 @@ public class LoginModel : PageModel
             {
                 return RedirectToPage("/Admin/Dashboard");
             }
+            else if (result.User.Role == "staff")
+            {
+                return RedirectToPage("/Staff/Dashboard/Index");
+            }
             else
             {
                 return RedirectToPage("/Index");

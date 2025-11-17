@@ -8,6 +8,7 @@ public interface IContractRepository
     Task<Contract?> GetByOrderIdAsync(int orderId);
     Task<IEnumerable<Contract>> GetByUserIdAsync(int userId);
     Task<IEnumerable<Contract>> GetPendingContractsAsync();
+    Task<IEnumerable<Contract>> GetAllAsync();
     Task<bool> ExistsByOrderIdAsync(int orderId);
     Task<Contract> CreateAsync(Contract contract);
     Task<Contract> UpdateAsync(Contract contract);

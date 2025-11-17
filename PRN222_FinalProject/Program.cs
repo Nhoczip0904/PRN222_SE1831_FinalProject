@@ -11,7 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 
 // Add SignalR
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+});
 
 // Configure DbContext
 builder.Services.AddDbContext<EvBatteryTrading2Context>(options =>
@@ -62,6 +66,7 @@ builder.Services.AddScoped<ICartService, CartService>();
 // Auction Services
 builder.Services.AddScoped<IAuctionService, AuctionService>();
 builder.Services.AddScoped<IBidService, BidService>();
+builder.Services.AddScoped<IAuctionNotificationService, AuctionNotificationService>();
 
 // Payment Services
 builder.Services.AddScoped<IWalletService, WalletService>();
@@ -75,6 +80,10 @@ builder.Services.AddScoped<IDeliveryService, DeliveryService>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+
+// Revenue Service
+builder.Services.AddScoped<IRevenueService, RevenueService>();
+
 // TODO: Implement these services later
 // builder.Services.AddScoped<IMessageService, MessageService>();
 // builder.Services.AddScoped<ISupportTicketService, SupportTicketService>();

@@ -1,0 +1,134 @@
+@page
+@model PRN222_FinalProject.Pages.Staff.Auctions.PendingModel
+@{
+    ViewData["Title"] = "Phê duyệt đấu giá";
+    Layout = "~/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 mb-0">Đấu giá chờ phê duyệt</h2>
+        <span class="badge bg-warning">@Model.PendingAuctions.Count() đấu giá</span>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert @(Model.Success ? "alert-success" : "alert-danger") alert-dismissible fade show" role="alert">
+            @Model.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!Model.PendingAuctions.Any())
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                <h5 class="mt-3">Không có đấu giá nào chờ phê duyệt</h5>
+                <p class="text-muted">Tất cả các đấu giá đã được xử lý.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var auction in Model.PendingAuctions)
+            {
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="card-title mb-1">@auction.ProductName</h6>
+                                    <small class="text-muted">ID: #@auction.Id</small>
+                                </div>
+                                <span class="badge bg-warning">Chờ duyệt</span>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Người bán</small>
+                                    <strong>@auction.SellerName</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Giá khởi điểm</small>
+                                    <strong class="text-primary">@auction.StartingPrice:N0} VNĐ</strong>
+                                </div>
+                            </div>
+
+                            @if (auction.ReservePrice.HasValue)
+                            {
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <small class="text-muted d-block">Giá dự trữ</small>
+                                        <strong>@auction.ReservePrice.Value:N0} VNĐ</strong>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Bắt đầu</small>
+                                    <strong>@auction.StartTime.ToString("dd/MM/yyyy HH:mm")</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Kết thúc</small>
+                                    <strong>@auction.EndTime.ToString("dd/MM/yyyy HH:mm")</strong>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Ngày tạo</small>
+                                <strong>@auction.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</strong>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <form method="post" asp-page-handler="Approve" asp-route-auctionId="@auction.Id" class="flex-fill">
+                                    <button type="submit" class="btn btn-success w-100" 
+                                            onclick="return confirm('Bạn có chắc muốn phê duyệt đấu giá này?')">
+                                        <i class="bi bi-check-circle"></i> Phê duyệt
+                                    </button>
+                                </form>
+                                
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#rejectModal-@auction.Id">
+                                    <i class="bi bi-x-circle"></i> Từ chối
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reject Modal -->
+                <div class="modal fade" id="rejectModal-@auction.Id" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Từ chối đấu giá #@auction.Id</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="post" asp-page-handler="Reject" asp-route-auctionId="@auction.Id">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="form-label">Lý do từ chối <span class="text-danger">*</span></label>
+                                        <textarea name="reason" class="form-control" rows="3" required 
+                                                  placeholder="Vui lòng nhập lý do từ chối đấu giá này..."></textarea>
+                                    </div>
+                                    <div class="alert alert-warning">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        <strong>Lưu ý:</strong> Đấu giá sẽ bị hủy và sản phẩm sẽ được mở khóa.
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="bi bi-x-circle"></i> Từ chối đấu giá
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

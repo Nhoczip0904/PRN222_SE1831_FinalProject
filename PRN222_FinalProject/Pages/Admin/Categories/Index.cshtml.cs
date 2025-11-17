@@ -22,7 +22,7 @@ public class IndexModel : PageModel
     public async Task<IActionResult> OnGetAsync()
     {
         var currentUser = HttpContext.Session.GetObjectFromJson<UserDto>("CurrentUser");
-        if (currentUser == null || currentUser.Role != "admin")
+        if (currentUser == null || (currentUser.Role != "admin" && currentUser.Role != "staff"))
         {
             return RedirectToPage("/Account/Login");
         }
@@ -36,7 +36,7 @@ public class IndexModel : PageModel
     public async Task<IActionResult> OnPostDeleteAsync(int id)
     {
         var currentUser = HttpContext.Session.GetObjectFromJson<UserDto>("CurrentUser");
-        if (currentUser == null || currentUser.Role != "admin")
+        if (currentUser == null || (currentUser.Role != "admin" && currentUser.Role != "staff"))
         {
             return RedirectToPage("/Account/Login");
         }

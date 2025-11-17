@@ -55,6 +55,7 @@
                                 <label asp-for="UserDto.Role" class="form-label">Vai trò <span class="text-danger">*</span></label>
                                 <select asp-for="UserDto.Role" class="form-select">
                                     <option value="member">Member</option>
+                                    <option value="staff">Staff</option>
                                     <option value="admin">Admin</option>
                                 </select>
                                 <span asp-validation-for="UserDto.Role" class="text-danger"></span>
@@ -63,8 +64,9 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Trạng thái</label>
                                 <div class="form-check">
-                                    <input asp-for="UserDto.IsVerified" type="checkbox" class="form-check-input" />
-                                    <label asp-for="UserDto.IsVerified" class="form-check-label">Tài khoản đã xác thực</label>
+                                    <input type="hidden" asp-for="UserDto.IsVerified" />
+                                    <input type="checkbox" class="form-check-input" checked="@(Model.UserDto.IsVerified ?? false)" onchange="document.getElementById('UserDto_IsVerified').value = this.checked" />
+                                    <label class="form-check-label">Tài khoản đã xác thực</label>
                                 </div>
                             </div>
                         </div>

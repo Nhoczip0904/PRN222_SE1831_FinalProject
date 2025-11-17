@@ -1,7 +1,6 @@
 using BLL.Helpers;
 using BLL.Services;
 using BLL.DTOs;
-using DAL.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -19,9 +18,9 @@ public class IndexModel : PageModel
     }
 
     public List<TransactionViewModel> AllTransactions { get; set; } = new();
-    public List<WalletTransaction> WalletTransactions { get; set; } = new();
+    public List<WalletTransactionDto> WalletTransactions { get; set; } = new();
     public List<TransactionViewModel> AuctionTransactions { get; set; } = new();
-    public List<Order> Orders { get; set; } = new();
+    public List<OrderDto> Orders { get; set; } = new();
 
     public async Task<IActionResult> OnGetAsync()
     {
@@ -33,7 +32,7 @@ public class IndexModel : PageModel
 
         // Get wallet transactions
         var walletResult = await _walletService.GetTransactionHistoryAsync(currentUser.Id);
-        WalletTransactions = walletResult.Select(wt => new WalletTransaction
+        WalletTransactions = walletResult.Select(wt => new WalletTransactionDto
         {
             Id = wt.Id,
             Amount = wt.Amount,
@@ -43,7 +42,7 @@ public class IndexModel : PageModel
         }).ToList();
 
         // Get orders - using dummy data for now
-        Orders = new List<Order>();
+        Orders = new List<OrderDto>();
 
         // Combine all transactions
         AllTransactions = new List<TransactionViewModel>();

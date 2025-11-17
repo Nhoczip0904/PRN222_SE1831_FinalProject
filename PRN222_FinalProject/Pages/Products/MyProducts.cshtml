@@ -32,6 +32,7 @@
                         <th>Giá</th>
                         <th>Pin</th>
                         <th>Trạng thái</th>
+                        <th>Lý do không được duyệt</th>
                         <th>Ngày đăng</th>
                         <th>Thao tác</th>
                     </tr>
@@ -55,33 +56,79 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="badge @(product.IsActive == true ? "bg-success" : "bg-secondary")">
-                                    @(product.IsActive == true ? "Đang bán" : "Đã ẩn")
-                                </span>
+                                @if (product.ApprovalStatus == "rejected")
+                                {
+                                    <span class="badge bg-danger" title="@(product.RejectionReason ?? "Không được duyệt")">
+                                        Không được duyệt
+                                    </span>
+                                }
+                                else if (product.IsSold == true)
+                                {
+                                    <span class="badge bg-danger">Đã bán</span>
+                                }
+                                else if (product.ApprovalStatus == "pending")
+                                {
+                                    <span class="badge bg-warning">Chờ duyệt</span>
+                                }
+                                else if (product.IsActive == true)
+                                {
+                                    <span class="badge bg-success">Đang bán</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Đã ẩn</span>
+                                }
+                            </td>
+                            <td>
+                                @if (product.ApprovalStatus == "rejected" && !string.IsNullOrEmpty(product.RejectionReason))
+                                {
+                                    <span class="text-danger" style="font-size: 0.85em;" title="@product.RejectionReason">
+                                        @(product.RejectionReason.Length > 50 ? product.RejectionReason.Substring(0, 50) + "..." : product.RejectionReason)
+                                    </span>
+                                }
+                                else if (product.ApprovalStatus == "rejected")
+                                {
+                                    <span class="text-muted" style="font-size: 0.85em;">
+                                        Không có lý do cụ thể
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted" style="font-size: 0.85em;">-</span>
+                                }
                             </td>
                             <td>@product.CreatedAt?.ToString("dd/MM/yyyy")</td>
                             <td>
-                                <div class="btn-group" role="group">
-                                    <a asp-page="/Products/Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-primary" title="Chỉnh sửa">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a asp-page="/Products/Details" asp-route-id="@product.Id" class="btn btn-sm btn-outline-info" title="Xem">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    @if (product.IsActive == true)
-                                    {
-                                        <form method="post" asp-page-handler="Deactivate" asp-route-id="@product.Id" style="display:inline;">
-                                            <button type="submit" class="btn btn-sm btn-outline-warning" title="Ẩn" onclick="return confirm('Bạn có chắc muốn ẩn sản phẩm này?')">
-                                                <i class="bi bi-eye-slash"></i>
+                                @if (!product.IsSold.HasValue || !product.IsSold.Value)
+                                {
+                                    <div class="btn-group" role="group">
+                                        <a asp-page="/Products/Edit" asp-route-id="@product.Id" class="btn btn-sm btn-outline-primary" title="Chỉnh sửa" 
+                                           disabled="@(product.ApprovalStatus == "rejected" || product.ApprovalStatus == "pending")">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-page="/Products/Details" asp-route-id="@product.Id" class="btn btn-sm btn-outline-info" title="Xem">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        @if (product.IsActive == true && product.ApprovalStatus != "rejected" && product.ApprovalStatus != "pending")
+                                        {
+                                            <form method="post" asp-page-handler="Deactivate" asp-route-id="@product.Id" style="display:inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Ẩn" onclick="return confirm('Bạn có chắc muốn ẩn sản phẩm này?')">
+                                                    <i class="bi bi-eye-slash"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        <form method="post" asp-page-handler="Delete" asp-route-id="@product.Id" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?')"
+                                                    disabled="@(product.ApprovalStatus == "rejected" || product.ApprovalStatus == "pending")">
+                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
-                                    }
-                                    <form method="post" asp-page-handler="Delete" asp-route-id="@product.Id" style="display:inline;">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Không thể thao tác</span>
+                                }
                             </td>
                         </tr>
                     }

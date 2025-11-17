@@ -18,14 +18,14 @@ public class NotificationService : INotificationService
         _hubContext = hubContext;
     }
 
-    public async Task NotifyProductApprovalAsync(int sellerId, int productId, string productName, bool approved)
+    public async Task NotifyProductApprovalAsync(int sellerId, int productId, string productName, bool approved, string? reason = null)
     {
         var connectionId = NotificationHub.GetConnectionId(sellerId);
         if (connectionId != null)
         {
             var message = approved 
                 ? $"Sản phẩm '{productName}' đã được duyệt!" 
-                : $"Sản phẩm '{productName}' đã bị từ chối.";
+                : $"Sản phẩm '{productName}' đã bị từ chối.{(!string.IsNullOrEmpty(reason) ? $" Lý do: {reason}" : "")}";
             var type = approved ? "success" : "error";
             
             await _hubContext.Clients.Client(connectionId).SendAsync("ReceiveNotification", message, type, $"/Products/Details?id={productId}");

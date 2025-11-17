@@ -332,6 +332,9 @@ public class ProductService : IProductService
             CategoryId = product.CategoryId,
             CategoryName = product.Category?.Name,
             IsActive = product.IsActive,
+            IsSold = product.IsSold,
+            ApprovalStatus = product.ApprovalStatus,
+            RejectionReason = product.RejectionReason,
             CreatedAt = product.CreatedAt,
             UpdatedAt = product.UpdatedAt
         };
@@ -408,8 +411,8 @@ public class ProductService : IProductService
 
         await _productRepository.UpdateAsync(product);
 
-        // Send notification to seller
-        await _notificationService.NotifyProductApprovalAsync(product.SellerId.Value, product.Id, product.Name, false);
+        // Send notification to seller with reason
+        await _notificationService.NotifyProductApprovalAsync(product.SellerId.Value, product.Id, product.Name, false, reason);
 
         // Broadcast to ALL users - Product disappears from homepage immediately
         await _notificationService.BroadcastProductRemovedAsync(product.Id, reason);

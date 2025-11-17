@@ -1,26 +1,21 @@
 using BLL.Helpers;
 using BLL.DTOs;
-using DAL.Entities;
+using BLL.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using DAL;
 
 namespace PRN222_FinalProject.Pages.Orders;
 
 public class ContractModel : PageModel
 {
-    private readonly EvBatteryTrading2Context _context;
+    private readonly IOrderService _orderService;
 
-    public ContractModel(EvBatteryTrading2Context context)
+    public ContractModel(IOrderService orderService)
     {
-        _context = context;
+        _orderService = orderService;
     }
 
-    public Order? Order { get; set; }
-    public User? Seller { get; set; }
-    public User? Buyer { get; set; }
-    public List<OrderItem> OrderItems { get; set; } = new();
+    public ContractDto? Contract { get; set; }
 
     public async Task<IActionResult> OnGetAsync(int orderId)
     {
@@ -30,29 +25,18 @@ public class ContractModel : PageModel
             return RedirectToPage("/Account/Login");
         }
 
-        Order = await _context.Orders
-            .Include(o => o.Buyer)
-            .Include(o => o.Seller)
-            .FirstOrDefaultAsync(o => o.Id == orderId);
+        Contract = await _orderService.GetContractDetailsAsync(orderId);
 
-        if (Order == null)
+        if (Contract == null)
         {
             return NotFound();
         }
 
         // Check permission
-        if (Order.BuyerId != currentUser.Id && Order.SellerId != currentUser.Id)
+        if (Contract.BuyerId != currentUser.Id && Contract.SellerId != currentUser.Id)
         {
             return Forbid();
         }
-
-        OrderItems = await _context.OrderItems
-            .Include(oi => oi.Product)
-            .Where(oi => oi.OrderId == orderId)
-            .ToListAsync();
-
-        Seller = Order.Seller;
-        Buyer = Order.Buyer;
 
         return Page();
     }

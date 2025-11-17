@@ -31,7 +31,7 @@ public class IndexModel : PageModel
     public async Task<IActionResult> OnGetAsync(string? status, string? keyword, int pageNumber = 1)
     {
         var currentUser = HttpContext.Session.GetObjectFromJson<UserDto>("CurrentUser");
-        if (currentUser == null || currentUser.Role != "admin")
+        if (currentUser == null || (currentUser.Role != "admin" && currentUser.Role != "staff"))
         {
             return RedirectToPage("/Account/Login");
         }

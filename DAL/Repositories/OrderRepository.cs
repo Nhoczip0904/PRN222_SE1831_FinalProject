@@ -152,6 +152,19 @@ public class OrderRepository : IOrderRepository
         return true;
     }
 
+    public async Task<bool> UpdateShippingAddressAsync(int orderId, string shippingAddress)
+    {
+        var order = await GetByIdAsync(orderId);
+        if (order == null)
+            return false;
+
+        order.ShippingAddress = shippingAddress;
+        order.UpdatedAt = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
     public async Task<bool> DeleteAsync(int id)
     {
         var order = await GetByIdAsync(id);

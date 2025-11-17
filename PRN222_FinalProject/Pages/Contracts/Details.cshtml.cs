@@ -1,7 +1,6 @@
 using BLL.Helpers;
 using BLL.Services;
 using BLL.DTOs;
-using DAL.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -16,7 +15,7 @@ public class DetailsModel : PageModel
         _contractService = contractService;
     }
 
-    public Contract? Contract { get; set; }
+    public ContractDetailsDto? Contract { get; set; }
     public bool CanBuyerConfirm { get; set; }
     public bool CanSellerConfirm { get; set; }
 
@@ -28,7 +27,7 @@ public class DetailsModel : PageModel
             return RedirectToPage("/Account/Login");
         }
 
-        Contract = await _contractService.GetContractByIdAsync(id);
+        Contract = await _contractService.GetContractDetailsByIdAsync(id);
         if (Contract == null)
         {
             return NotFound();
