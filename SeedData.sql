@@ -17,7 +17,7 @@ GO
 INSERT INTO users (email, phone, full_name, address, password_hash, role, is_verified, created_at, updated_at)
 VALUES 
 ('admin@evbattery.com', '0901234567', 'Admin System', 'Hà Nội, Việt Nam', 
- '$2a$11$XvZ5YqJ5YqJ5YqJ5YqJ5YuJ5YqJ5YqJ5YqJ5YqJ5YqJ5YqJ5YqJ5Y', -- Admin@123
+ '$2a$11$rGH2t0o/k0f5axQ.slwCN.btbJTwWggyzAd5W5tEHVpLolIE34jGi', -- Admin@123
  'admin', 1, GETDATE(), GETDATE());
 
 -- Insert Sample Members
@@ -25,23 +25,23 @@ VALUES
 INSERT INTO users (email, phone, full_name, address, password_hash, role, is_verified, created_at, updated_at)
 VALUES 
 ('user1@evbattery.com', '0912345678', 'Nguyễn Văn A', '123 Đường ABC, Quận 1, TP.HCM', 
- '$2a$11$YvZ5YqJ5YqJ5YqJ5YqJ5YuJ5YqJ5YqJ5YqJ5YqJ5YqJ5YqJ5YqJ5Z', -- User@123
+ '$2a$11$.v14Jeg7cjltuc58wziiCeVLTGa8H8o1LvTndhAqGdB8EKRdkWnE.', -- User@123
  'member', 1, GETDATE(), GETDATE()),
  
 ('user2@evbattery.com', '0923456789', 'Trần Thị B', '456 Đường XYZ, Quận 2, TP.HCM', 
- '$2a$11$YvZ5YqJ5YqJ5YqJ5YqJ5YuJ5YqJ5YqJ5YqJ5YqJ5YqJ5YqJ5YqJ5Z', -- User@123
+ '$2a$11$.v14Jeg7cjltuc58wziiCeVLTGa8H8o1LvTndhAqGdB8EKRdkWnE.', -- User@123
  'member', 1, GETDATE(), GETDATE()),
  
 ('user3@evbattery.com', '0934567890', 'Lê Văn C', '789 Đường DEF, Quận 3, TP.HCM', 
- '$2a$11$YvZ5YqJ5YqJ5YqJ5YqJ5YuJ5YqJ5YqJ5YqJ5YqJ5YqJ5YqJ5YqJ5Z', -- User@123
+ '$2a$11$.v14Jeg7cjltuc58wziiCeVLTGa8H8o1LvTndhAqGdB8EKRdkWnE.', -- User@123
  'member', 0, GETDATE(), GETDATE()), -- Unverified user
  
 ('seller1@evbattery.com', '0945678901', 'Phạm Thị D', '321 Đường GHI, Quận 4, TP.HCM', 
- '$2a$11$YvZ5YqJ5YqJ5YqJ5YqJ5YuJ5YqJ5YqJ5YqJ5YqJ5YqJ5YqJ5YqJ5Z', -- User@123
+ '$2a$11$.v14Jeg7cjltuc58wziiCeVLTGa8H8o1LvTndhAqGdB8EKRdkWnE.', -- User@123
  'member', 1, GETDATE(), GETDATE()),
  
 ('buyer1@evbattery.com', '0956789012', 'Hoàng Văn E', '654 Đường JKL, Quận 5, TP.HCM', 
- '$2a$11$YvZ5YqJ5YqJ5YqJ5YqJ5YuJ5YqJ5YqJ5YqJ5YqJ5YqJ5YqJ5YqJ5Z', -- User@123
+ '$2a$11$.v14Jeg7cjltuc58wziiCeVLTGa8H8o1LvTndhAqGdB8EKRdkWnE.', -- User@123
  'member', 1, GETDATE(), GETDATE());
 
 -- Insert Categories
