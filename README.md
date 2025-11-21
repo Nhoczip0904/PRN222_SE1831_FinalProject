@@ -329,22 +329,14 @@ dotnet run --project PRN222_FinalProject
   - Quyền: Toàn quyền hệ thống
 
 - **Nhân viên (Staff)**:
-  - Email: staff@evbattery.com
-  - Mật khẩu: Staff@123
-  - Quyền: Quản lý sản phẩm, danh mục, đấu giá
+  - Tạo bằng tài khoản admin
 
 - **Người dùng (Member)**:
   - Email: user@evbattery.com
   - Mật khẩu: User@123
   - Quyền: Xem sản phẩm, tham gia đấu giá
 
-## Tài khoản mẫu (nếu đã seed data)
-- **Admin**: 
-  - Email: admin@evbattery.com
-  - Password: Admin@123
-- **Member**:
-  - Email: user@evbattery.com
-  - Password: User@123
+
 
 ## Kiến trúc hệ thống
 
@@ -518,7 +510,7 @@ dotnet run --project PRN222_FinalProject
 
 ## Liên hệ
 - Email: support@evbattery.com
-- GitHub: [Your GitHub URL]
+
 
 ## License
 MIT License
